@@ -1,0 +1,37 @@
+# ============================================================
+# ZYVV — Python Intelligence Layer Dependencies
+# File: python/requirements.txt
+# ============================================================
+# Phase 1: Minimal — just the FastAPI stack to prove the runtime.
+# Phase 3: Uncomment the intelligence libraries when ready.
+# ============================================================
+
+# ── Web framework ─────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+
+# ── Data validation ───────────────────────────────────────────
+pydantic==2.7.1
+
+# ── HTTP client (for calling Supabase REST and Groq from Python) ──
+httpx==0.27.0
+
+# ── Environment variables ──────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── Phase 3: Uncomment when building the intelligence layer ───
+
+# Supabase client
+# supabase==2.4.3
+
+# OpenAI embeddings (text-embedding-3-small)
+# openai==1.30.1
+
+# NumPy for vector math / cosine similarity
+# numpy==1.26.4
+
+# scikit-learn for clustering (pattern detection)
+# scikit-learn==1.5.0
+
+# Groq Python client (for pattern summarization from Python side)
+# groq==0.9.0
