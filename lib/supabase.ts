@@ -22,8 +22,8 @@ export const supabase = createClient(
 // ── Admin client (server-only) ───────────────────────────────
 // Only import/use this in API routes (app/api/**), never in components.
 export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.SUPABASE_SERVICE_KEY ?? '',
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co',
+ process.env.SUPABASE_SERVICE_KEY ?? 'placeholder',
   {
     auth: {
       autoRefreshToken: false,
