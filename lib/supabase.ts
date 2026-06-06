@@ -82,11 +82,20 @@ export async function saveChoice(
 // ── Get portal count ─────────────────────────────────────────
 // Reads from the portal_count view (anon-readable per schema).
 export async function getPortalCount(): Promise<number> {
-  const { data, error } = await supabase
-    .from('portal_count')
-    .select('total')
-    .single()
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) return 0
+    
+    const client = createClient(url, key)
+    const { data, error } = await client
+      .from('portal_count')
+      .select('total')
+      .single()
 
-  if (error) return 0 // fail silently — counter is cosmetic
-  return Number(data?.total ?? 0)
+    if (error) return 0
+    return Number(data?.total ?? 0)
+  } catch {
+    return 0
+  }
 }
