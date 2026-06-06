@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const situation_id = await saveSituation({
       content: situation,
       session_id: session_id ?? null,
-      email: null,
+      email: undefined,
     })
 
     // ── Save doors to Supabase ─────────────────────────────────
