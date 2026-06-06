@@ -6,9 +6,7 @@
 import Groq from 'groq-sdk'
 import type { Door, DoorType } from '@/lib/types'
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY!,
-})
+
 
 // ============================================================
 // SYSTEM PROMPT
@@ -81,8 +79,12 @@ export interface GroqGenerateResult {
 export async function generateDoors(
   situation: string
 ): Promise<GroqGenerateResult> {
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY!,
+  })
+
   const completion = await groq.chat.completions.create({
-    model: 'llama-3.1-70b-versatile',
+    model: 'llama-3.3-70b-versatile',
     temperature: 0.9,       // High creativity — doors should feel fresh
     max_tokens: 1024,
     response_format: { type: 'json_object' },
