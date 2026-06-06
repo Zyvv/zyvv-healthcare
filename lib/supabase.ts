@@ -12,9 +12,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Situation, Door, Choice } from '@/lib/types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!
 
 // ── Anon client (public-safe) ────────────────────────────────
 export const supabase = createClient(
@@ -24,12 +21,16 @@ export const supabase = createClient(
 
 // ── Admin client (server-only) ───────────────────────────────
 // Only import/use this in API routes (app/api/**), never in components.
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-})
+export const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+  process.env.SUPABASE_SERVICE_KEY ?? '',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+)
 
 // ============================================================
 // DB HELPERS
