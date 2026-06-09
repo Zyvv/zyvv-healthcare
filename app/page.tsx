@@ -1,6 +1,22 @@
+
 // ============================================================
 // ZYVV — Main Page
 // File: app/page.tsx
+// ============================================================
+// The full phase orchestrator. Controls the entire user journey:
+//
+//   input   → user types situation
+//   loading → Groq is generating
+//   roast   → RoastReveal typewriter plays
+//   doors   → three Door components shown
+//   chosen  → user picked a door (Door highlights, save fires)
+//   share   → ShareCard appears
+//
+// All state lives here. Child components are pure-display.
+// API calls: /api/generate (on submit), /api/save (on door pick).
+// ============================================================
+```
+
 // ============================================================
 
 'use client'
