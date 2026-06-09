@@ -377,6 +377,7 @@ export default function HomePage() {
   const [mirror, setMirror] = useState('')
   const [doors, setDoors] = useState<DoorType[]>([])
   const [situationId, setSituationId] = useState<number | null>(null)
+  const [choiceId, setChoiceId] = useState<number | null>(null)
   const [chosenDoor, setChosenDoor] = useState<DoorType | null>(null)
   const [revealedCount, setRevealedCount] = useState(0)
   const [objection, setObjection] = useState('')
