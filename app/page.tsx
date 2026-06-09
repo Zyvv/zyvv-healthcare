@@ -470,7 +470,7 @@ export default function HomePage() {
                 className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase mb-2"
                 style={{ color: '#333' }}
               >
-                YOUR SITUATION
+                BE HONEST.
               </div>
               <p
                 className="font-mono text-[12px] leading-[1.6] mb-8"
@@ -503,7 +503,7 @@ export default function HomePage() {
                   className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase mb-1"
                   style={{ color: '#333' }}
                 >
-                  YOUR SITUATION
+                  BE HONEST.
                 </div>
                 <p
                   className="font-mono text-[11px] leading-[1.6]"
