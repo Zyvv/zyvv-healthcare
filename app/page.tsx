@@ -225,12 +225,13 @@ export default function HomePage() {
 
               {/* Tagline */}
               <motion.p
+
                 variants={fadeUp}
                 custom={0.08}
                 className="font-mono text-[11px] tracking-[0.16em] uppercase"
                 style={{ color: '#00F5FF' }}
               >
-                THREE DOORS FOR EVERY DECISION
+                THREE DOORS CHATGPT WON'T OPEN.
               </motion.p>
             </motion.header>
           )}
