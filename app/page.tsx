@@ -299,7 +299,7 @@ export default function HomePage() {
                       handleSubmit()
                     }
                   }}
-                  placeholder="I've been at this job for 3 years. The pay is fine. I feel nothing."
+                  placeholder="I know what I need to do. I've known for months. I still haven't done it."
                   rows={4}
                   className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm"
                   style={{
@@ -581,7 +581,7 @@ export default function HomePage() {
             className="font-mono text-[10px] tracking-[0.10em] uppercase"
             style={{ color: '#222' }}
           >
-            ZYVV · The doors have always been there.
+            ZYVV · Not advice. A way out.
           </span>
         </footer>
       </div>
