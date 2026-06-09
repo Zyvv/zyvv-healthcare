@@ -99,10 +99,14 @@ export default function HomePage() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          situation: trimmed,
-          session_id: sessionIdRef.current,
-        }),
+        const fullSituation = tried
+  ? `${trimmed}\n\nWhat I've already tried: ${tried}`
+  : trimmed
+
+body: JSON.stringify({
+  situation: fullSituation,
+  session_id: sessionIdRef.current,
+}),
       })
 
       const data: GenerateResponse & { error?: string } = await res.json()
