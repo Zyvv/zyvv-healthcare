@@ -279,7 +279,7 @@ export async function POST(req: NextRequest) {
 
     // ── Build + send ───────────────────────────────────────────
     const { data, error } = await resend.emails.send({
-      from: 'ZYVV <zyvv.contact@gmail.com>',  
+      from: 'ZYVV <onboarding@resend.dev>',  
       to: [email],
       subject: 'Your portal is open.',
       html: buildEmailHtml(body),
