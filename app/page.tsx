@@ -378,20 +378,11 @@ export default function HomePage() {
               >
                 THE VOID IS THINKING
               </div>
-              <div className="flex gap-3">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="block rounded-full"
-                    style={{
-                      width: 6,
-                      height: 6,
-                      background: '#00F5FF',
-                      animation: `pulse-glow 1.4s ease-in-out ${i * 0.22}s infinite`,
-                    }}
-                  />
-                ))}
-              </div>
+<div className="flex gap-3">
+  <span className="dot-pulse" />
+  <span className="dot-pulse" />
+  <span className="dot-pulse" />
+</div>
               <p
                 className="font-mono text-[11px] text-center mt-8 leading-[1.6] px-4"
                 style={{ color: '#2a2a2a', maxWidth: 300 }}
@@ -507,12 +498,7 @@ export default function HomePage() {
         </footer>
       </div>
 
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.25; transform: scale(0.7); }
-        }
-      `}</style>
+    
     </main>
   )
 }
