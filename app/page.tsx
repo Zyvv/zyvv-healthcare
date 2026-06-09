@@ -1,18 +1,17 @@
 // ============================================================
-// ZYVV — Main Page (WARP ENGINE · MIRROR UPDATE)
+// ZYVV — Main Page (WARP ENGINE · TALMUDIC PROTOCOL)
 // File: app/page.tsx
 //
 // PHASES:
-//   bigbang  → stars explode from center (first 2s on landing)
-//   idle     → warp tunnel, streaks toward vanishing point
-//   typing   → acceleration — streaks elongate per keystroke
-//   launch   → hyperspace: shockwave rings + white flash
-//   arrived  → deep purple cosmos, world has shifted
-//   mirror   → typewriter slams the truth in
-//   doors    → three worlds, each with own color temperature
-//
-// AI: Groq (kept). Mirror concept — not a roast, a reflection.
-// Secular framing. No religious language in UI.
+//   input        → user types situation
+//   loading      → MODE A Groq generating
+//   roast        → mirror truth typewriter reveal
+//   doors        → three doors shown, staggered reveal
+//   chosen       → brief transition after pick
+//   interrogation → user raises a doubt
+//   refining     → MODE B Groq generating
+//   refined      → critique + refined path + next vector
+//   share        → share card
 // ============================================================
 
 'use client'
@@ -23,7 +22,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Door from '@/app/components/Door'
 import PortalCounter from '@/app/components/PortalCounter'
 import ShareCard from '@/app/components/ShareCard'
-import type { AppPhase, Door as DoorType, GenerateResponse } from '@/lib/types'
+import { DOOR_CONFIGS } from '@/lib/types'
+import type {
+  AppPhase,
+  Door as DoorType,
+  GenerateResponse,
+  InterrogateResponse,
+  RefinementBlock,
+} from '@/lib/types'
 
 function generateSessionId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -34,7 +40,8 @@ function generateSessionId(): string {
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (delay = 0) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay },
   }),
   exit: { opacity: 0, y: -16, transition: { duration: 0.25, ease: 'easeIn' } },
@@ -48,7 +55,10 @@ const staggerContainer = {
 const slamIn = {
   hidden: { opacity: 0, scale: 1.12, y: 14, filter: 'blur(6px)' },
   visible: (delay = 0) => ({
-    opacity: 1, scale: 1, y: 0, filter: 'blur(0px)',
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: 'blur(0px)',
     transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
   }),
 }
@@ -62,23 +72,17 @@ const DOOR_REVEAL_DELAY = 800
 type WarpPhase = 'bigbang' | 'idle' | 'typing' | 'launch' | 'arrived'
 
 interface WarpStar {
-  angle: number    // radians from center
-  dist: number     // 0 = center, 1 = edge
-  speed: number    // dist units per frame
+  angle: number
+  dist: number
+  speed: number
   color: string
-  bright: number   // 0-1
+  bright: number
   thick: number
 }
 
 const WARP_COLORS = [
-  '#ffffff',
-  '#c8d8ff',
-  '#a8c0ff',
-  '#00F5FF',
-  '#80d4ff',
-  '#BF5AF2',
-  '#ffd080',
-  '#ff9f7f',
+  '#ffffff', '#c8d8ff', '#a8c0ff', '#00F5FF',
+  '#80d4ff', '#BF5AF2', '#ffd080', '#ff9f7f',
 ]
 
 function warpColor(): string {
@@ -108,11 +112,11 @@ function useWarpCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement>,
   warpPhaseRef: React.RefObject<WarpPhase>,
   speedRef: React.RefObject<number>,
-  arrivalColorRef: React.RefObject<string>,
+  arrivalColorRef: React.RefObject<string>
 ) {
-  const starsRef  = useRef<WarpStar[]>([])
-  const frameRef  = useRef<number>(0)
-  const bigBangRef = useRef<number>(1) // 1→0 during bigbang deceleration
+  const starsRef = useRef<WarpStar[]>([])
+  const frameRef = useRef<number>(0)
+  const bigBangRef = useRef<number>(1)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -124,7 +128,7 @@ function useWarpCanvas(
     const STAR_COUNT = window.innerWidth < 600 ? 320 : 580
 
     function resize() {
-      w = canvas!.width  = window.innerWidth
+      w = canvas!.width = window.innerWidth
       h = canvas!.height = window.innerHeight
       starsRef.current = Array.from({ length: STAR_COUNT }, makeWarpStar)
     }
@@ -132,7 +136,6 @@ function useWarpCanvas(
     resize()
     window.addEventListener('resize', resize)
 
-    // Big bang burst: stars start at center, exploding outward
     starsRef.current = Array.from({ length: STAR_COUNT }, () => ({
       ...makeWarpStar(),
       dist: 0.005 + Math.random() * 0.02,
@@ -146,8 +149,8 @@ function useWarpCanvas(
       frameRef.current = requestAnimationFrame(draw)
       t += 1
 
-      const phase        = warpPhaseRef.current ?? 'idle'
-      const userSpeed    = speedRef.current ?? 0
+      const phase = warpPhaseRef.current ?? 'idle'
+      const userSpeed = speedRef.current ?? 0
       const arrivalColor = arrivalColorRef.current ?? 'rgba(0,0,0,0)'
 
       let speedMult: number
@@ -170,12 +173,10 @@ function useWarpCanvas(
         trailMult = 12 + launchFlash * 35
         flashAlpha = launchFlash
       } else {
-        // arrived
         speedMult = 0.35
         trailMult = 0.65
       }
 
-      // Background fade — determines trail length
       ctx.globalAlpha = 1
       if (phase === 'launch' && flashAlpha > 0.45) {
         ctx.fillStyle = `rgba(255,255,255,${(flashAlpha - 0.45) * 0.9})`
@@ -185,7 +186,6 @@ function useWarpCanvas(
       ctx.fillStyle = `rgba(0,0,5,${trailFade})`
       ctx.fillRect(0, 0, w, h)
 
-      // Arrival tint
       if (phase === 'arrived') {
         ctx.fillStyle = arrivalColor
         ctx.globalAlpha = 0.045
@@ -203,8 +203,10 @@ function useWarpCanvas(
 
         const prevX = cx + Math.cos(star.angle) * prevDist * maxR
         const prevY = cy + Math.sin(star.angle) * prevDist * maxR
-        const nextX  = cx + Math.cos(star.angle) * star.dist  * maxR
-        const nextY  = cy + Math.sin(star.angle) * star.dist  * maxR
+        const nextX = cx + Math.cos(star.angle) * star.dist * maxR
+        const nextY = cy + Math.sin(star.angle) * star.dist * maxR
+
+        void prevX; void prevY
 
         const streakLen = Math.max(
           0.5,
@@ -215,29 +217,40 @@ function useWarpCanvas(
 
         ctx.globalAlpha = brightness
         ctx.strokeStyle = star.color
-        ctx.lineWidth   = star.thick * (0.5 + star.dist)
+        ctx.lineWidth = star.thick * (0.5 + star.dist)
 
         ctx.beginPath()
-        const sx = cx + Math.cos(star.angle) * Math.max(0, (star.dist - streakLen / maxR)) * maxR
-        const sy = cy + Math.sin(star.angle) * Math.max(0, (star.dist - streakLen / maxR)) * maxR
+        const sx =
+          cx +
+          Math.cos(star.angle) *
+            Math.max(0, star.dist - streakLen / maxR) *
+            maxR
+        const sy =
+          cy +
+          Math.sin(star.angle) *
+            Math.max(0, star.dist - streakLen / maxR) *
+            maxR
         ctx.moveTo(sx, sy)
         ctx.lineTo(nextX, nextY)
         ctx.stroke()
 
-        if (star.dist > 1.08) {
-          Object.assign(star, makeWarpStar())
-        }
+        if (star.dist > 1.08) Object.assign(star, makeWarpStar())
       })
 
       ctx.globalAlpha = 1
 
-      // Central vortex glow
       if (phase !== 'arrived') {
-        const vSize = phase === 'launch'
-          ? 140 + launchFlash * 220
-          : phase === 'bigbang' ? 100 : 45
+        const vSize =
+          phase === 'launch'
+            ? 140 + launchFlash * 220
+            : phase === 'bigbang'
+            ? 100
+            : 45
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, vSize)
-        grad.addColorStop(0, `rgba(0,245,255,${phase === 'launch' ? 0.28 + launchFlash * 0.45 : 0.09})`)
+        grad.addColorStop(
+          0,
+          `rgba(0,245,255,${phase === 'launch' ? 0.28 + launchFlash * 0.45 : 0.09})`
+        )
         grad.addColorStop(0.4, `rgba(191,90,242,${phase === 'launch' ? 0.18 : 0.04})`)
         grad.addColorStop(1, 'transparent')
         ctx.fillStyle = grad
@@ -256,22 +269,18 @@ function useWarpCanvas(
   }, [canvasRef, warpPhaseRef, speedRef, arrivalColorRef])
 }
 
-// ── Hyperspace launch effect ─────────────────────────────────
+// ── Hyperspace launch ────────────────────────────────────────
 
 function triggerHyperspaceFlash(onDone: () => void) {
-  const rings = 5
-  for (let i = 0; i < rings; i++) {
+  for (let i = 0; i < 5; i++) {
     setTimeout(() => {
       const ring = document.createElement('div')
       ring.style.cssText = `
-        position:fixed;
-        left:50%;top:50%;
+        position:fixed;left:50%;top:50%;
         transform:translate(-50%,-50%) scale(0.1);
-        width:140px;height:140px;
-        border-radius:50%;
+        width:140px;height:140px;border-radius:50%;
         border:2px solid rgba(0,245,255,${0.95 - i * 0.16});
-        pointer-events:none;
-        z-index:9999;
+        pointer-events:none;z-index:9999;
         animation:hyperRing 0.85s cubic-bezier(0.16,1,0.3,1) forwards;
       `
       document.body.appendChild(ring)
@@ -282,10 +291,8 @@ function triggerHyperspaceFlash(onDone: () => void) {
   setTimeout(() => {
     const flash = document.createElement('div')
     flash.style.cssText = `
-      position:fixed;inset:0;
-      background:white;
-      pointer-events:none;
-      z-index:9998;
+      position:fixed;inset:0;background:white;
+      pointer-events:none;z-index:9998;
       animation:hyperFlash 0.65s ease-out forwards;
     `
     document.body.appendChild(flash)
@@ -296,9 +303,15 @@ function triggerHyperspaceFlash(onDone: () => void) {
 
 // ── Mirror typewriter ────────────────────────────────────────
 
-function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => void }) {
+function MirrorReveal({
+  text,
+  onComplete,
+}: {
+  text: string
+  onComplete: () => void
+}) {
   const [displayed, setDisplayed] = useState('')
-  const [done, setDone]           = useState(false)
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
     let i = 0
@@ -314,9 +327,9 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
           setDone(true)
           setTimeout(onComplete, 1600)
         }
-      }, 20) // 20ms — blade-fast typewriter
+      }, 20)
       return () => clearInterval(interval)
-    }, 700) // dramatic breath before the truth lands
+    }, 700)
 
     return () => clearTimeout(startDelay)
   }, [text, onComplete])
@@ -332,7 +345,8 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
         lineHeight: 1.6,
         color: '#ffffff',
         letterSpacing: '0.01em',
-        textShadow: '0 0 30px rgba(0,245,255,0.25), 0 0 70px rgba(191,90,242,0.12)',
+        textShadow:
+          '0 0 30px rgba(0,245,255,0.25), 0 0 70px rgba(191,90,242,0.12)',
       }}
     >
       {displayed}
@@ -356,38 +370,37 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
 // ── Main component ───────────────────────────────────────────
 
 export default function HomePage() {
-  const [phase, setPhase]             = useState<AppPhase>('input')
-  const [situation, setSituation]     = useState('')
-  const [tried, setTried]             = useState('')
-  const [error, setError]             = useState('')
-  const [mirror, setMirror]           = useState('')   // renamed from roast
-  const [doors, setDoors]             = useState<DoorType[]>([])
+  const [phase, setPhase] = useState<AppPhase>('input')
+  const [situation, setSituation] = useState('')
+  const [tried, setTried] = useState('')
+  const [error, setError] = useState('')
+  const [mirror, setMirror] = useState('')
+  const [doors, setDoors] = useState<DoorType[]>([])
   const [situationId, setSituationId] = useState<number | null>(null)
-  const [chosenDoor, setChosenDoor]   = useState<DoorType | null>(null)
+  const [chosenDoor, setChosenDoor] = useState<DoorType | null>(null)
   const [revealedCount, setRevealedCount] = useState(0)
+  const [objection, setObjection] = useState('')
+  const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
 
-  const sessionIdRef    = useRef<string>(generateSessionId())
-  const textareaRef     = useRef<HTMLTextAreaElement>(null)
-  const canvasRef       = useRef<HTMLCanvasElement>(null)
-  const submitBtnRef    = useRef<HTMLButtonElement>(null)
+  const sessionIdRef = useRef<string>(generateSessionId())
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const submitBtnRef = useRef<HTMLButtonElement>(null)
   const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  // Warp engine refs
-  const warpPhaseRef    = useRef<WarpPhase>('bigbang')
-  const speedRef        = useRef<number>(0)
+  const warpPhaseRef = useRef<WarpPhase>('bigbang')
+  const speedRef = useRef<number>(0)
   const arrivalColorRef = useRef<string>('rgba(0,0,0,0)')
 
   useWarpCanvas(canvasRef, warpPhaseRef, speedRef, arrivalColorRef)
 
-  // Big bang → idle after landing
+  // Big bang → idle
   useEffect(() => {
-    const t = setTimeout(() => {
-      warpPhaseRef.current = 'idle'
-    }, 2200)
+    const t = setTimeout(() => { warpPhaseRef.current = 'idle' }, 2200)
     return () => clearTimeout(t)
   }, [])
 
-  // Speed decay when idle
+  // Speed decay
   useEffect(() => {
     const decay = setInterval(() => {
       speedRef.current = Math.max(0, speedRef.current - 0.04)
@@ -415,13 +428,15 @@ export default function HomePage() {
     return () => revealTimersRef.current.forEach(clearTimeout)
   }, [phase, doors])
 
-  // World color shift on arrival phases
+  // World color shift on arrival
   useEffect(() => {
-    if (phase === 'roast' || phase === 'doors') {
+    if (phase === 'roast' || phase === 'doors' || phase === 'interrogation' || phase === 'refined') {
       arrivalColorRef.current = 'rgba(60,0,90,0.07)'
       warpPhaseRef.current = 'arrived'
     }
   }, [phase])
+
+  // ── MODE A: submit ───────────────────────────────────────────
 
   const handleSubmit = useCallback(async () => {
     const trimmed = situation.trim()
@@ -431,7 +446,6 @@ export default function HomePage() {
     }
     setError('')
 
-    // HYPERSPACE LAUNCH
     warpPhaseRef.current = 'launch'
     triggerHyperspaceFlash(async () => {
       setPhase('loading')
@@ -455,69 +469,123 @@ export default function HomePage() {
         const data: GenerateResponse & { error?: string } = await res.json()
         if (!res.ok || data.error) throw new Error(data.error ?? 'Generation failed.')
 
-        // API still returns `roast` key — we map it to mirror internally
         setMirror(data.roast)
         setDoors(data.doors)
         setSituationId(data.situation_id)
-        setPhase('roast') // phase key kept for type compat, semantics = mirror
+        setPhase('roast')
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
+        setError(
+          err instanceof Error ? err.message : 'Something went wrong. Try again.'
+        )
         setPhase('input')
         warpPhaseRef.current = 'idle'
       }
     })
   }, [situation, tried])
 
-  const handleDoorChosen = useCallback(async (door: DoorType) => {
-    setChosenDoor(door)
-    setPhase('chosen')
-    if (situationId && door.id) {
-      try {
-        await fetch('/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ situation_id: situationId, door_id: door.id }),
-        })
-      } catch { /* silent */ }
+  // ── Door chosen → interrogation ──────────────────────────────
+
+  const handleDoorChosen = useCallback(
+    async (door: DoorType) => {
+      setChosenDoor(door)
+      setPhase('chosen')
+      if (situationId && door.id) {
+        try {
+          await fetch('/api/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ situation_id: situationId, door_id: door.id }),
+          })
+        } catch { /* silent */ }
+      }
+      setTimeout(() => setPhase('interrogation'), 900)
+    },
+    [situationId]
+  )
+
+  // ── MODE B: interrogate ──────────────────────────────────────
+
+  const handleInterrogate = useCallback(async () => {
+    if (!objection.trim() || !chosenDoor) return
+    setPhase('refining')
+
+    try {
+      const fullSituation = tried
+        ? `${situation.trim()}\n\nWhat I've already tried: ${tried}`
+        : situation.trim()
+
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'INTERROGATION',
+          previous_situation: fullSituation,
+          selected_door: chosenDoor.door_type,
+          user_objection: objection.trim(),
+          session_id: sessionIdRef.current,
+        }),
+      })
+
+      const data: InterrogateResponse & { error?: string } = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error ?? 'Interrogation failed.')
+
+      setRefinement(data.refinement_block)
+      setPhase('refined')
+    } catch {
+      setPhase('interrogation')
     }
-    setTimeout(() => setPhase('share'), 800)
-  }, [situationId])
+  }, [objection, chosenDoor, situation, tried])
+
+  // ── Reset ────────────────────────────────────────────────────
 
   const handleReset = useCallback(() => {
-    setSituation(''); setTried(''); setMirror(''); setDoors([])
-    setSituationId(null); setChosenDoor(null); setError(''); setRevealedCount(0)
+    setSituation('')
+    setTried('')
+    setMirror('')
+    setDoors([])
+    setSituationId(null)
+    setChosenDoor(null)
+    setError('')
+    setRevealedCount(0)
+    setObjection('')
+    setRefinement(null)
     revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
-    sessionIdRef.current     = generateSessionId()
-    warpPhaseRef.current     = 'bigbang'
-    speedRef.current         = 0
-    arrivalColorRef.current  = 'rgba(0,0,0,0)'
+    sessionIdRef.current = generateSessionId()
+    warpPhaseRef.current = 'bigbang'
+    speedRef.current = 0
+    arrivalColorRef.current = 'rgba(0,0,0,0)'
     setTimeout(() => textareaRef.current?.focus(), 300)
   }, [])
 
-  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value
-    if (val.length > MAX_CHARS) return
-    setSituation(val)
-    if (error) setError('')
-    const el = e.target
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [error])
+  const handleTextareaChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const val = e.target.value
+      if (val.length > MAX_CHARS) return
+      setSituation(val)
+      if (error) setError('')
+      const el = e.target
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    },
+    [error]
+  )
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Every keystroke = acceleration
-    speedRef.current = Math.min(1, speedRef.current + 0.12)
-    warpPhaseRef.current = 'typing'
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault()
-      handleSubmit()
-    }
-  }, [handleSubmit])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      speedRef.current = Math.min(1, speedRef.current + 0.12)
+      warpPhaseRef.current = 'typing'
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        handleSubmit()
+      }
+    },
+    [handleSubmit]
+  )
 
-  const charsLeft   = MAX_CHARS - situation.length
+  const charsLeft = MAX_CHARS - situation.length
   const isNearLimit = situation.length >= WARN_CHARS
-  const canSubmit   = situation.trim().length >= 10
+  const canSubmit = situation.trim().length >= 10
 
   return (
     <>
@@ -529,7 +597,7 @@ export default function HomePage() {
       >
         <div className="w-full max-w-[420px] flex flex-col">
 
-          {/* ── HEADER (input + loading phases) ── */}
+          {/* ── HEADER ── */}
           <AnimatePresence mode="wait">
             {(phase === 'input' || phase === 'loading') && (
               <motion.header
@@ -547,7 +615,8 @@ export default function HomePage() {
                   style={{
                     fontSize: 'clamp(64px, 20vw, 108px)',
                     lineHeight: 0.88,
-                    textShadow: '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
+                    textShadow:
+                      '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
                   }}
                 >
                   ZYVV
@@ -556,7 +625,10 @@ export default function HomePage() {
                   variants={fadeUp}
                   custom={0.1}
                   className="font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
-                  style={{ color: '#00F5FF', textShadow: '0 0 20px rgba(0,245,255,0.4)' }}
+                  style={{
+                    color: '#00F5FF',
+                    textShadow: '0 0 20px rgba(0,245,255,0.4)',
+                  }}
                 >
                   THREE DOORS CHATGPT WON&apos;T OPEN.
                 </motion.p>
@@ -587,7 +659,7 @@ export default function HomePage() {
             )}
           </AnimatePresence>
 
-          {/* ── PHASES ── */}
+          {/* ── PHASE CONTENT ── */}
           <AnimatePresence mode="wait">
 
             {/* INPUT */}
@@ -629,7 +701,8 @@ export default function HomePage() {
                     }}
                     onFocus={(e) => {
                       if (!error) e.currentTarget.style.borderColor = '#00F5FF'
-                      e.currentTarget.style.boxShadow = '0 0 22px rgba(0,245,255,0.13)'
+                      e.currentTarget.style.boxShadow =
+                        '0 0 22px rgba(0,245,255,0.13)'
                     }}
                     onBlur={(e) => {
                       if (!error) e.currentTarget.style.borderColor = '#1e1e1e'
@@ -642,7 +715,10 @@ export default function HomePage() {
                   {isNearLimit && (
                     <div
                       className="absolute bottom-3 right-3 font-mono text-[10px]"
-                      style={{ color: situation.length >= MAX_CHARS - 50 ? '#FF2D55' : '#444' }}
+                      style={{
+                        color:
+                          situation.length >= MAX_CHARS - 50 ? '#FF2D55' : '#444',
+                      }}
                     >
                       {charsLeft}
                     </div>
@@ -664,8 +740,12 @@ export default function HomePage() {
                       outline: 'none',
                       transition: 'border-color 0.2s',
                     }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = '#00F5FF')}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = '#1e1e1e')}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.borderColor = '#00F5FF')
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.borderColor = '#1e1e1e')
+                    }
                   />
                 </motion.div>
 
@@ -695,11 +775,13 @@ export default function HomePage() {
                       background: canSubmit
                         ? 'linear-gradient(135deg, #00F5FF 0%, #0088aa 100%)'
                         : '#0a0a0a',
-                      color:  canSubmit ? '#000' : '#2a2a2a',
+                      color: canSubmit ? '#000' : '#2a2a2a',
                       border: canSubmit ? 'none' : '1px solid #1a1a1a',
                       cursor: canSubmit ? 'pointer' : 'not-allowed',
                       transition: 'all 0.25s',
-                      boxShadow: canSubmit ? '0 0 30px rgba(0,245,255,0.2)' : 'none',
+                      boxShadow: canSubmit
+                        ? '0 0 30px rgba(0,245,255,0.2)'
+                        : 'none',
                     }}
                     onMouseEnter={(e) => {
                       if (canSubmit) {
@@ -729,7 +811,11 @@ export default function HomePage() {
                   ⌘↵ to submit · No account required
                 </motion.p>
 
-                <motion.div variants={fadeUp} custom={0.38} className="mt-10 flex justify-center">
+                <motion.div
+                  variants={fadeUp}
+                  custom={0.38}
+                  className="mt-10 flex justify-center"
+                >
                   <PortalCounter />
                 </motion.div>
               </motion.section>
@@ -764,7 +850,7 @@ export default function HomePage() {
               </motion.section>
             )}
 
-            {/* MIRROR — the truth, not a roast */}
+            {/* MIRROR */}
             {phase === 'roast' && (
               <motion.section
                 key="mirror-phase"
@@ -773,18 +859,19 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                {/* Label */}
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.1 }}
                   className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
-                  style={{ color: '#BF5AF2', textShadow: '0 0 20px rgba(191,90,242,0.4)' }}
+                  style={{
+                    color: '#BF5AF2',
+                    textShadow: '0 0 20px rgba(191,90,242,0.4)',
+                  }}
                 >
                   THE MIRROR
                 </motion.div>
 
-                {/* Typewriter reveal */}
                 <MirrorReveal
                   text={mirror}
                   onComplete={() => setPhase('doors')}
@@ -792,8 +879,8 @@ export default function HomePage() {
               </motion.section>
             )}
 
-            {/* DOORS + CHOSEN + SHARE */}
-            {(phase === 'doors' || phase === 'chosen' || phase === 'share') && (
+            {/* DOORS + CHOSEN */}
+            {(phase === 'doors' || phase === 'chosen') && (
               <motion.section
                 key="doors-phase"
                 initial={{ opacity: 0 }}
@@ -801,7 +888,6 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                {/* Situation echo */}
                 <div className="mb-5">
                   <div
                     className="font-mono text-[9px] font-black tracking-[0.18em] uppercase mb-1"
@@ -809,13 +895,15 @@ export default function HomePage() {
                   >
                     BE HONEST.
                   </div>
-                  <p className="font-mono text-[11px] leading-[1.6]" style={{ color: '#333' }}>
+                  <p
+                    className="font-mono text-[11px] leading-[1.6]"
+                    style={{ color: '#333' }}
+                  >
                     {situation.trim().slice(0, 100)}
                     {situation.trim().length > 100 ? '…' : ''}
                   </p>
                 </div>
 
-                {/* Mirror quote */}
                 <div
                   className="border-l-2 pl-4 mb-8"
                   style={{ borderColor: '#BF5AF2' }}
@@ -828,7 +916,6 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                {/* Doors */}
                 <div className="flex flex-col gap-4 mb-8">
                   {doors.map((door, i) => (
                     <Door
@@ -844,41 +931,264 @@ export default function HomePage() {
                 </div>
 
                 <AnimatePresence>
-                  {revealedCount >= doors.length && doors.length > 0 && !chosenDoor && (
-                    <motion.div
-                      key="choose-prompt"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      className="font-mono text-[10px] tracking-[0.18em] uppercase text-center mb-8"
-                      style={{ color: '#2a2a2a' }}
-                    >
-                      YOUR DOOR
-                    </motion.div>
-                  )}
+                  {revealedCount >= doors.length &&
+                    doors.length > 0 &&
+                    !chosenDoor && (
+                      <motion.div
+                        key="choose-prompt"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="font-mono text-[10px] tracking-[0.18em] uppercase text-center mb-8"
+                        style={{ color: '#2a2a2a' }}
+                      >
+                        YOUR DOOR
+                      </motion.div>
+                    )}
                 </AnimatePresence>
+              </motion.section>
+            )}
 
-                <AnimatePresence>
-                  {phase === 'share' && chosenDoor && (
-                    <motion.div
-                      key="share-card"
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 16 }}
-                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      <div className="h-px mb-8" style={{ background: '#141414' }} />
-                      <ShareCard
-                        situation={situation.trim()}
-                        roast={mirror}
-                        doors={doors}
-                        chosenDoor={chosenDoor}
-                        onDone={handleReset}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            {/* INTERROGATION */}
+            {phase === 'interrogation' && chosenDoor && (
+              <motion.section
+                key="interrogation-phase"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div
+                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
+                  style={{
+                    color: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
+                    textShadow: `0 0 20px ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}66`,
+                  }}
+                >
+                  INTERROGATION
+                </div>
+
+                <p
+                  className="font-mono text-[12px] leading-[1.65] mb-6"
+                  style={{ color: '#555' }}
+                >
+                  You chose{' '}
+                  <span
+                    style={{
+                      color: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
+                    }}
+                  >
+                    {chosenDoor.title}
+                  </span>
+                  . What&apos;s your doubt?
+                </p>
+
+                <textarea
+                  value={objection}
+                  onChange={(e) => setObjection(e.target.value)}
+                  placeholder="But I don't have enough time for that..."
+                  rows={3}
+                  className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm mb-4"
+                  style={{
+                    background: 'rgba(6,6,8,0.88)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid #1e1e1e',
+                    color: '#fff',
+                    outline: 'none',
+                    resize: 'none',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.borderColor =
+                      DOOR_CONFIGS[chosenDoor.door_type].glowColor)
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.borderColor = '#1e1e1e')
+                  }
+                  autoFocus
+                />
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleInterrogate}
+                    disabled={objection.trim().length < 4}
+                    className="flex-1 font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                    style={{
+                      background:
+                        objection.trim().length >= 4
+                          ? DOOR_CONFIGS[chosenDoor.door_type].glowColor
+                          : '#0a0a0a',
+                      color:
+                        objection.trim().length >= 4 ? '#000' : '#2a2a2a',
+                      border:
+                        objection.trim().length >= 4
+                          ? 'none'
+                          : '1px solid #1a1a1a',
+                      cursor:
+                        objection.trim().length >= 4
+                          ? 'pointer'
+                          : 'not-allowed',
+                      transition: 'all 0.25s',
+                    }}
+                  >
+                    INTERROGATE
+                  </button>
+                  <button
+                    onClick={() => setPhase('share')}
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-5 py-4 rounded-sm"
+                    style={{
+                      color: '#333',
+                      border: '1px solid #1a1a1a',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    SKIP
+                  </button>
+                </div>
+              </motion.section>
+            )}
+
+            {/* REFINING */}
+            {phase === 'refining' && (
+              <motion.section
+                key="refining-phase"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center justify-center py-24"
+              >
+                <div
+                  className="font-mono text-[10px] font-black tracking-[0.22em] uppercase mb-8"
+                  style={{
+                    color: '#BF5AF2',
+                    textShadow: '0 0 30px rgba(191,90,242,0.5)',
+                    animation: 'loadingPulse 2s ease-in-out infinite',
+                  }}
+                >
+                  STRESS-TESTING YOUR DOUBT
+                </div>
+                <div className="flex gap-3">
+                  <span className="dot-pulse" />
+                  <span className="dot-pulse" />
+                  <span className="dot-pulse" />
+                </div>
+              </motion.section>
+            )}
+
+            {/* REFINED */}
+            {phase === 'refined' && refinement && chosenDoor && (
+              <motion.section
+                key="refined-phase"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div
+                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
+                  style={{ color: '#BF5AF2' }}
+                >
+                  REFINED PATH
+                </div>
+
+                {/* Diagnosis */}
+                <div
+                  className="border-l-2 pl-4 mb-6"
+                  style={{ borderColor: '#FF2D55' }}
+                >
+                  <div
+                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
+                    style={{ color: '#FF2D5566' }}
+                  >
+                    DIAGNOSIS
+                  </div>
+                  <p
+                    className="font-mono text-[12px] leading-[1.65]"
+                    style={{ color: '#888' }}
+                  >
+                    {refinement.critique}
+                  </p>
+                </div>
+
+                {/* Refined path */}
+                <div
+                  className="border-l-2 pl-4 mb-6"
+                  style={{
+                    borderColor: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
+                  }}
+                >
+                  <div
+                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
+                    style={{
+                      color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}88`,
+                    }}
+                  >
+                    REFINED PATH
+                  </div>
+                  <p
+                    className="font-mono text-[12px] leading-[1.65]"
+                    style={{ color: '#ccc' }}
+                  >
+                    {refinement.refined_path}
+                  </p>
+                </div>
+
+                {/* Next vector */}
+                <div
+                  className="border-l-2 pl-4 mb-8"
+                  style={{ borderColor: '#333' }}
+                >
+                  <div
+                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
+                    style={{ color: '#333' }}
+                  >
+                    NEXT QUESTION
+                  </div>
+                  <p
+                    className="font-mono text-[12px] leading-[1.65]"
+                    style={{ color: '#555' }}
+                  >
+                    {refinement.next_interrogation_vector}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setPhase('share')}
+                  className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, #BF5AF2 0%, #7a22cc 100%)',
+                    color: '#000',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 0 30px rgba(191,90,242,0.25)',
+                  }}
+                >
+                  CONTINUE →
+                </button>
+              </motion.section>
+            )}
+
+            {/* SHARE */}
+            {phase === 'share' && chosenDoor && (
+              <motion.section
+                key="share-phase"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 16 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="h-px mb-8" style={{ background: '#141414' }} />
+                <ShareCard
+                  situation={situation.trim()}
+                  roast={mirror}
+                  doors={doors}
+                  chosenDoor={chosenDoor}
+                  onDone={handleReset}
+                />
               </motion.section>
             )}
 
@@ -889,7 +1199,7 @@ export default function HomePage() {
               className="font-mono text-[10px] tracking-[0.10em] uppercase"
               style={{ color: '#1a1a1a' }}
             >
-              ZYVV · Not advice. A way out.
+              ZYVV · Not advice. A mirror.
             </span>
           </footer>
 

@@ -1,13 +1,20 @@
+// ============================================================
+// ZYVV — Groq AI Engine
+// File: lib/groq.ts
+// ============================================================
+
 import Groq from 'groq-sdk'
 import type { Door, DoorType } from '@/lib/types'
 
-const SYSTEM_PROMPT = `You are ZYVV — the world's first living decision mirror, built on the architecture of Oral Torah: no final answers, only sharper questions and unexpected paths.
+// ── MODE A: INITIALIZATION ────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are ZYVV — the world's first living decision mirror.
 
 Your job when a human drops their situation:
 
-1. ROAST — one sentence only.
+1. MIRROR — one sentence only.
 
-   The roast is not an insult. It is the thing they already know but have not said out loud.
+   This is not an insult. It is the thing they already know but have not said out loud.
    It names the exact avoidance, the specific loop, the precise lie they are telling themselves.
    It must use details from what they wrote — never generic, never transferable to another person.
    It should feel like: "how did it know that."
@@ -21,24 +28,19 @@ Your job when a human drops their situation:
    Good: "You already know which door — you're here because you want someone to blame if it goes wrong."
    Good: "You built the plan, the timeline, and the excuse — in that order."
    Bad: "You're at a crossroads in your career journey."
-   Bad: "You've relocated to France without securing employment." (summary, not a roast)
 
 2. THREE DOORS — paths they have not considered.
 
-   THE CONVENTIONAL DOOR
+   THE SURFACE DOOR (conventional)
    The optimized version of what most people do. Specific. Actionable. What does day one actually look like?
 
-   THE CONTRARIAN DOOR
+   THE FRICTION DOOR (contrarian)
    Runs against their instinct. Sounds wrong at first. Grounded in a real mechanism.
 
-   THE ALIEN DOOR
+   THE DEPTH DOOR (alien)
    A lateral move into a different category entirely.
    Should feel: "I never would have thought of that."
    This is the door that changes the frame, not just the plan.
-
-Before generating each door, identify the ONE specific wall this person is hitting.
-The door must go through that exact wall, not around it.
-Do not name the wall in your response — just make sure every door is built around it.
 
 Rules:
 - Every door must assume the person has no connections, no budget, and no permission from the system blocking them.
@@ -84,9 +86,7 @@ export interface GroqGenerateResult {
 export async function generateDoors(
   situation: string
 ): Promise<GroqGenerateResult> {
-  const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY!,
-  })
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -94,14 +94,8 @@ export async function generateDoors(
     max_tokens: 1024,
     response_format: { type: 'json_object' },
     messages: [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT,
-      },
-      {
-        role: 'user',
-        content: `Here is my situation:\n\n${situation.trim()}`,
-      },
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: `Here is my situation:\n\n${situation.trim()}` },
     ],
   })
 
@@ -130,8 +124,86 @@ export async function generateDoors(
     }
   }
 
-  return {
-    roast: parsed.roast,
-    doors: parsed.doors,
+  return { roast: parsed.roast, doors: parsed.doors }
+}
+
+// ── MODE B: INTERROGATION ─────────────────────────────────────
+
+const INTERROGATION_PROMPT = `You are ZYVV Engine in INTERROGATION MODE.
+
+A user selected a door and raised an objection. Do not validate their doubt.
+Treat the objection as a data point — a cognitive reveal.
+Diagnose why this objection emerged from this specific door choice.
+Output a refined path that uses the constraint the objection reveals as a mechanism, not an obstacle.
+
+Rules:
+- The refined_path must be stronger because of the objection, not despite it.
+- next_interrogation_vector pushes one level deeper — not wider.
+- No therapy-speak. No encouragement. Cold, surgical, precise.
+- Return valid JSON only. No markdown. No preamble.
+
+Return ONLY this JSON:
+{
+  "refinement_block": {
+    "critique": "Why this objection reveals a deeper constraint or cognitive pattern.",
+    "refined_path": "Updated strategy that incorporates the objection as a feature.",
+    "next_interrogation_vector": "One specific question that pushes the user one level deeper.",
+    "outcome_tracking_hint": "A short specific question to ping the user in 30 days."
   }
+}`
+
+export interface RefinementBlock {
+  critique: string
+  refined_path: string
+  next_interrogation_vector: string
+  outcome_tracking_hint: string
+}
+
+export interface GroqInterrogateResult {
+  refinement_block: RefinementBlock
+}
+
+export async function interrogateDoor(
+  previous_situation: string,
+  selected_door: DoorType,
+  user_objection: string
+): Promise<GroqInterrogateResult> {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    temperature: 0.85,
+    max_tokens: 1024,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: INTERROGATION_PROMPT },
+      {
+        role: 'user',
+        content: `Previous situation: ${previous_situation.trim()}\n\nSelected door: ${selected_door}\n\nUser objection: ${user_objection.trim()}`,
+      },
+    ],
+  })
+
+  const raw = completion.choices[0]?.message?.content
+  if (!raw) throw new Error('Groq returned empty response')
+
+  let parsed: GroqInterrogateResult
+
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw new Error(`Groq response was not valid JSON: ${raw.slice(0, 200)}`)
+  }
+
+  const rb = parsed.refinement_block
+  if (
+    !rb?.critique ||
+    !rb?.refined_path ||
+    !rb?.next_interrogation_vector ||
+    !rb?.outcome_tracking_hint
+  ) {
+    throw new Error(`Refinement block missing required fields: ${JSON.stringify(parsed)}`)
+  }
+
+  return parsed
 }

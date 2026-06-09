@@ -4,7 +4,6 @@
 // ============================================================
 
 // ── Door Types ───────────────────────────────────────────────
-// Mirrors the door_type CHECK constraint in schema.sql
 
 export type DoorType = 'conventional' | 'contrarian' | 'alien'
 
@@ -43,10 +42,10 @@ export interface Outcome {
   outcome_score?: number // 1–5
 }
 
-// ── API Payloads ─────────────────────────────────────────────
+// ── API Payloads — MODE A ────────────────────────────────────
 
-// POST /api/generate
 export interface GenerateRequest {
+  mode?: 'INITIALIZATION'
   situation: string
   session_id: string
 }
@@ -57,7 +56,29 @@ export interface GenerateResponse {
   situation_id: number
 }
 
-// POST /api/save
+// ── API Payloads — MODE B ────────────────────────────────────
+
+export interface InterrogateRequest {
+  mode: 'INTERROGATION'
+  previous_situation: string
+  selected_door: DoorType
+  user_objection: string
+  session_id?: string
+}
+
+export interface RefinementBlock {
+  critique: string
+  refined_path: string
+  next_interrogation_vector: string
+  outcome_tracking_hint: string
+}
+
+export interface InterrogateResponse {
+  refinement_block: RefinementBlock
+}
+
+// ── Save ─────────────────────────────────────────────────────
+
 export interface SaveChoiceRequest {
   situation_id: number
   door_id: number
@@ -67,7 +88,8 @@ export interface SaveChoiceResponse {
   choice_id: number
 }
 
-// POST /api/email
+// ── Email ────────────────────────────────────────────────────
+
 export interface EmailRequest {
   email: string
   situation: string
@@ -79,45 +101,47 @@ export interface EmailRequest {
 // ── UI State ─────────────────────────────────────────────────
 
 export type AppPhase =
-  | 'input'       // Landing: user types situation
-  | 'loading'     // Groq is generating
-  | 'roast'       // Roast is being revealed
-  | 'doors'       // Three doors are shown
-  | 'chosen'      // User picked a door
-  | 'share'       // Share card visible
+  | 'input'          // Landing: user types situation
+  | 'loading'        // Groq MODE A generating
+  | 'roast'          // Mirror truth typewriter reveal
+  | 'doors'          // Three doors shown
+  | 'chosen'         // User picked a door (brief transition)
+  | 'interrogation'  // User raises a doubt
+  | 'refining'       // Groq MODE B generating
+  | 'refined'        // Refinement block revealed
+  | 'share'          // Share card visible
 
-// ── Door Config (UI metadata) ────────────────────────────────
-// Maps door_type to its display color and label
+// ── Door Config (UI metadata) ─────────────────────────────────
 
 export interface DoorConfig {
   type: DoorType
   label: string
-  color: string        // Tailwind text color class
-  borderColor: string  // Tailwind border color class
-  shadowColor: string  // Tailwind shadow class
-  glowColor: string    // Raw hex for Framer Motion animations
+  color: string
+  borderColor: string
+  shadowColor: string
+  glowColor: string
 }
 
 export const DOOR_CONFIGS: Record<DoorType, DoorConfig> = {
   conventional: {
     type: 'conventional',
-    label: 'The Conventional Door',
-    color: 'text-zyvv-green',
-    borderColor: 'border-zyvv-green',
-    shadowColor: 'shadow-green',
-    glowColor: '#00FF94',
+    label: 'The Surface Door',
+    color: 'text-zyvv-cyan',
+    borderColor: 'border-zyvv-cyan',
+    shadowColor: 'shadow-cyan',
+    glowColor: '#00F5FF',
   },
   contrarian: {
     type: 'contrarian',
-    label: 'The Contrarian Door',
-    color: 'text-zyvv-red',
-    borderColor: 'border-zyvv-red',
-    shadowColor: 'shadow-red',
-    glowColor: '#FF2D55',
+    label: 'The Friction Door',
+    color: 'text-zyvv-amber',
+    borderColor: 'border-zyvv-amber',
+    shadowColor: 'shadow-amber',
+    glowColor: '#FFB830',
   },
   alien: {
     type: 'alien',
-    label: 'The Alien Door',
+    label: 'The Depth Door',
     color: 'text-zyvv-purple',
     borderColor: 'border-zyvv-purple',
     shadowColor: 'shadow-purple',
