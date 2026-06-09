@@ -1,4 +1,3 @@
-
 // ============================================================
 // ZYVV — Main Page
 // File: app/page.tsx
@@ -14,9 +13,6 @@
 //
 // All state lives here. Child components are pure-display.
 // API calls: /api/generate (on submit), /api/save (on door pick).
-// ============================================================
-```
-
 // ============================================================
 
 'use client'
