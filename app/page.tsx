@@ -108,8 +108,6 @@ const res = await fetch('/api/generate', {
     situation: fullSituation,
     session_id: sessionIdRef.current,
   }),
-})      
-      })
 
       const data: GenerateResponse & { error?: string } = await res.json()
 
