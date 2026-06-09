@@ -279,7 +279,7 @@ export default function HomePage() {
                 className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase mb-3"
                 style={{ color: '#555' }}
               >
-                DROP YOUR SITUATION
+                BE HONEST.
               </motion.div>
 
               {/* Textarea */}
@@ -319,7 +319,7 @@ export default function HomePage() {
                   }}
                   autoFocus
                   spellCheck
-                  aria-label="Describe your situation"
+                  aria-label="BE HONEST."
                 />
 
                 {/* Char counter — appears near limit */}
