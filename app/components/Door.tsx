@@ -110,14 +110,15 @@ export default function Door({
   const opacity = isAnyChosen && !isChosen ? 0.35 : 1
 
   return (
-    <motion.div
-      custom={index}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      style={{ opacity }}
-      className="transition-opacity duration-500"
-    >
+      <motion.div
+        custom={index}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        style={{ opacity }}
+        className="transition-opacity duration-500"
+        data-door-index={index}
+      >
       <motion.div
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}

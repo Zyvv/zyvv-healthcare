@@ -544,6 +544,7 @@ export default function HomePage() {
     setMirror('')
     setDoors([])
     setSituationId(null)
+    setChoiceId(null)
     setChosenDoor(null)
     setError('')
     setRevealedCount(0)
@@ -1187,6 +1188,7 @@ export default function HomePage() {
                   roast={mirror}
                   doors={doors}
                   chosenDoor={chosenDoor}
+                  choiceId={choiceId}
                   onDone={handleReset}
                 />
               </motion.section>
