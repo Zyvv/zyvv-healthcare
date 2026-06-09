@@ -73,7 +73,8 @@ export default function HomePage() {
   // ── Generate result ────────────────────────────────────────
   const [roast, setRoast] = useState('')
   const [doors, setDoors] = useState<DoorType[]>([])
-  const [situationId, setSituationId] = useState<number | null>(null)
+  const [situationId, setSituationId] = useState<number | null>(null) 
+  const [tried, setTried] = useState('')
 
   // ── Chosen door ────────────────────────────────────────────
   const [chosenDoor, setChosenDoor] = useState<DoorType | null>(null)
@@ -96,17 +97,18 @@ export default function HomePage() {
     setPhase('loading')
 
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        const fullSituation = tried
+const fullSituation = tried
   ? `${trimmed}\n\nWhat I've already tried: ${tried}`
   : trimmed
 
-body: JSON.stringify({
-  situation: fullSituation,
-  session_id: sessionIdRef.current,
-}),
+const res = await fetch('/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    situation: fullSituation,
+    session_id: sessionIdRef.current,
+  }),
+})      
       })
 
       const data: GenerateResponse & { error?: string } = await res.json()
