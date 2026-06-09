@@ -2,22 +2,10 @@
 // ZYVV — Main Page
 // File: app/page.tsx
 // ============================================================
-// The full phase orchestrator. Controls the entire user journey:
-//
-//   input   → user types situation
-//   loading → Groq is generating
-//   roast   → RoastReveal typewriter plays
-//   doors   → three Door components shown
-//   chosen  → user picked a door (Door highlights, save fires)
-//   share   → ShareCard appears
-//
-// All state lives here. Child components are pure-display.
-// API calls: /api/generate (on submit), /api/save (on door pick).
-// ============================================================
 
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import Door from '@/app/components/Door'
@@ -54,6 +42,9 @@ const staggerContainer = {
 const MAX_CHARS = 2000
 const WARN_CHARS = 1800
 
+// Delay between each door reveal (ms)
+const DOOR_REVEAL_DELAY = 900
+
 export default function HomePage() {
   const [phase, setPhase] = useState<AppPhase>('input')
   const [situation, setSituation] = useState('')
@@ -64,8 +55,32 @@ export default function HomePage() {
   const [situationId, setSituationId] = useState<number | null>(null)
   const [chosenDoor, setChosenDoor] = useState<DoorType | null>(null)
 
+  // Sequential door reveal: how many doors are currently visible
+  const [revealedCount, setRevealedCount] = useState(0)
+
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  // When phase becomes 'doors', drip-reveal each door with a delay
+  useEffect(() => {
+    if (phase === 'doors' && doors.length > 0) {
+      setRevealedCount(0)
+      // Clear any stale timers
+      revealTimersRef.current.forEach(clearTimeout)
+      revealTimersRef.current = []
+
+      doors.forEach((_, i) => {
+        const t = setTimeout(() => {
+          setRevealedCount((prev) => Math.max(prev, i + 1))
+        }, i * DOOR_REVEAL_DELAY)
+        revealTimersRef.current.push(t)
+      })
+    }
+    return () => {
+      revealTimersRef.current.forEach(clearTimeout)
+    }
+  }, [phase, doors])
 
   const handleSubmit = useCallback(async () => {
     const trimmed = situation.trim()
@@ -143,6 +158,8 @@ export default function HomePage() {
     setSituationId(null)
     setChosenDoor(null)
     setError('')
+    setRevealedCount(0)
+    revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
     sessionIdRef.current = generateSessionId()
     setTimeout(() => textareaRef.current?.focus(), 300)
@@ -378,11 +395,11 @@ export default function HomePage() {
               >
                 THE VOID IS THINKING
               </div>
-<div className="flex gap-3">
-  <span className="dot-pulse" />
-  <span className="dot-pulse" />
-  <span className="dot-pulse" />
-</div>
+              <div className="flex gap-3">
+                <span className="dot-pulse" />
+                <span className="dot-pulse" />
+                <span className="dot-pulse" />
+              </div>
               <p
                 className="font-mono text-[11px] text-center mt-8 leading-[1.6] px-4"
                 style={{ color: '#2a2a2a', maxWidth: 300 }}
@@ -450,19 +467,37 @@ export default function HomePage() {
                 </p>
               </div>
 
+              {/* ── Sequential door reveal ── */}
               <div className="flex flex-col gap-4 mb-8">
                 {doors.map((door, i) => (
                   <Door
                     key={door.id ?? i}
                     door={door}
                     index={i}
-                    isRevealed={true}
+                    isRevealed={i < revealedCount}
                     isChosen={chosenDoor?.id === door.id}
                     isAnyChosen={chosenDoor !== null}
                     onChoose={handleDoorChosen}
                   />
                 ))}
               </div>
+
+              {/* ── "Choose your door" prompt — appears after all 3 revealed ── */}
+              <AnimatePresence>
+                {revealedCount >= doors.length && doors.length > 0 && !chosenDoor && (
+                  <motion.div
+                    key="choose-prompt"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase text-center mb-8"
+                    style={{ color: '#333' }}
+                  >
+                    YOUR DOOR
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <AnimatePresence>
                 {phase === 'share' && chosenDoor && (
@@ -497,8 +532,6 @@ export default function HomePage() {
           </span>
         </footer>
       </div>
-
-    
     </main>
   )
 }
