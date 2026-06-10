@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(response, { status: 200 })
     }
 
-    // ── MODE A: INITIALIZATION ───────────────────────────────
+       // ── MODE A: INITIALIZATION ───────────────────────────────
     const { situation, session_id } = body as GenerateRequest
 
     const trimmed = situation?.trim()
@@ -84,23 +84,10 @@ export async function POST(req: NextRequest) {
     const savedDoors = await saveDoors(doorsWithMoat)
 
     const response: GenerateResponse = {
-      roast,
+      roast,                    // ← Should now be properly cleaned
       doors: savedDoors,
       situation_id,
-      structuredData,           // ← Moat data exposed
+      structuredData,           // ← Moat data (safe to expose)
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (err: any) {
-    console.error('[/api/generate] Error:', err)
-
-    return NextResponse.json(
-      { 
-        error: err.message?.includes('JSON') 
-          ? 'AI response format issue. Try again.' 
-          : 'Something went wrong. The void is temporarily unavailable.' 
-      },
-      { status: 500 }
-    )
-  }
-}
