@@ -1,6 +1,7 @@
 // ============================================================
 // ZYVV — Shared TypeScript Types
 // File: lib/types.ts
+// Enhanced with Data Moat structures
 // ============================================================
 
 // ── Door Types ───────────────────────────────────────────────
@@ -14,6 +15,25 @@ export interface Door {
   title: string
   description: string
   why_it_works: string
+  // Moat enhancement
+  potential_objections?: string[]
+}
+
+// ── Structured Data for Moat (from Groq JSON) ────────────────
+
+export interface StructuredDoorData {
+  type: string
+  title: string
+  description: string
+  why_it_works: string
+  potential_objections: string[]
+}
+
+export interface StructuredData {
+  situation_summary: string
+  roast_key_insights: string[]
+  doors: StructuredDoorData[]
+  suggested_tracking_questions: string
 }
 
 // ── Situation ────────────────────────────────────────────────
@@ -23,6 +43,8 @@ export interface Situation {
   content: string
   session_id?: string
   email?: string
+  // Future: embedding vector for similarity search
+  embedding?: any
 }
 
 // ── Choice ───────────────────────────────────────────────────
@@ -31,6 +53,7 @@ export interface Choice {
   id?: number
   situation_id: number
   door_id: number
+  objection?: string // Store user objection when they pick a door
 }
 
 // ── Outcome (Phase 2+) ───────────────────────────────────────
@@ -47,13 +70,14 @@ export interface Outcome {
 export interface GenerateRequest {
   mode?: 'INITIALIZATION'
   situation: string
-  session_id: string
+  session_id?: string
 }
 
 export interface GenerateResponse {
   roast: string
   doors: Door[]
   situation_id: number
+  structuredData?: StructuredData   // ← New for moat
 }
 
 // ── API Payloads — MODE B ────────────────────────────────────
@@ -82,6 +106,7 @@ export interface InterrogateResponse {
 export interface SaveChoiceRequest {
   situation_id: number
   door_id: number
+  objection?: string
 }
 
 export interface SaveChoiceResponse {
@@ -101,15 +126,15 @@ export interface EmailRequest {
 // ── UI State ─────────────────────────────────────────────────
 
 export type AppPhase =
-  | 'input'          // Landing: user types situation
-  | 'loading'        // Groq MODE A generating
-  | 'roast'          // Mirror truth typewriter reveal
-  | 'doors'          // Three doors shown
-  | 'chosen'         // User picked a door (brief transition)
-  | 'interrogation'  // User raises a doubt
-  | 'refining'       // Groq MODE B generating
-  | 'refined'        // Refinement block revealed
-  | 'share'          // Share card visible
+  | 'input'
+  | 'loading'
+  | 'roast'
+  | 'doors'
+  | 'chosen'
+  | 'interrogation'
+  | 'refining'
+  | 'refined'
+  | 'share'
 
 // ── Door Config (UI metadata) ─────────────────────────────────
 
