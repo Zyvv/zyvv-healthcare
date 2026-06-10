@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(response, { status: 200 })
     }
 
-       // ── MODE A: INITIALIZATION ───────────────────────────────
+    // ── MODE A: INITIALIZATION ───────────────────────────────
     const { situation, session_id } = body as GenerateRequest
 
     const trimmed = situation?.trim()
@@ -62,19 +62,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Situation too long. Keep it under 2000 characters.' }, { status: 400 })
     }
 
-    // Generate via Groq with moat-focused prompt
+    // Generate via Groq
     const groqResult = await generateDoors(trimmed)
-
     const { roast, doors, structuredData } = groqResult
 
-    // Save situation
+    // Save to database
     const situation_id = await saveSituation({
       content: trimmed,
       session_id: session_id ?? null,
       email: undefined,
     })
 
-    // Save doors with enriched moat data
     const doorsWithMoat = doors.map((door, index) => ({
       ...door,
       situation_id,
@@ -84,10 +82,21 @@ export async function POST(req: NextRequest) {
     const savedDoors = await saveDoors(doorsWithMoat)
 
     const response: GenerateResponse = {
-      roast,                    // ← Should now be properly cleaned
+      roast,
       doors: savedDoors,
       situation_id,
-      structuredData,           // ← Moat data (safe to expose)
+      structuredData,        // Safe because we updated the type
     }
 
     return NextResponse.json(response, { status: 200 })
+  } catch (err: any) {
+    console.error('[/api/generate] Error:', err)
+
+    return NextResponse.json(
+      { 
+        error: 'Something went wrong. The void is temporarily unavailable.' 
+      },
+      { status: 500 }
+    )
+  }
+}
