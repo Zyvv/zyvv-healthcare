@@ -1117,7 +1117,7 @@ export default function HomePage() {
             <PortalCounter />
             <span
               className="font-mono text-[10px] tracking-[0.10em] uppercase"
-              style={{ color: '#333' }}
+              style={{ color: '#f9f1f1' }}
             >
               ZYVV · Not advice. A way out.
             </span>
