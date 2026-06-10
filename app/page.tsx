@@ -735,7 +735,8 @@ export default function HomePage() {
                         transition: 'border-color 0.2s, box-shadow 0.2s',
                       }}
                       onFocus={(e) => {
-                        setIsFocused(true)
+                      if (situation.length === 0) return
+                      setIsFocused(true)
                         if (!error) e.currentTarget.style.borderColor = '#00F5FF'
                         e.currentTarget.style.boxShadow = '0 0 22px rgba(0,245,255,0.13)'
                       }}
