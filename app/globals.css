@@ -42,6 +42,7 @@
   /* ── Door accents (defaults; overridden by data-door-index) ── */
   --door-accent:        var(--color-cyan);
   --door-glow:          rgba(0, 245, 255, 0.15);
+  --door-border:        rgba(0, 245, 255, 0.25);
 
   /* ── Typography ── */
   --font-sans:          var(--font-inter), system-ui, sans-serif;
@@ -110,19 +111,16 @@ body {
   z-index: 0;
   opacity: 1;
   background: var(--color-void);
-  /* GPU hint — keeps canvas composited on its own layer */
   will-change: opacity;
   transform: translateZ(0);
 }
 
-/* Mirror phase: canvas shifts to deep purple atmosphere */
 #galaxy-canvas[data-phase="mirror"],
 #galaxy-canvas[data-phase="doors"] {
   background: var(--color-mirror-deep);
   transition: background 1.2s var(--ease-out-expo);
 }
 
-/* All page content sits above the canvas */
 main {
   position: relative;
   z-index: 1;
@@ -171,11 +169,11 @@ main {
    5. SCROLLBAR
    ============================================================ */
 
-::-webkit-scrollbar          { width: 3px; height: 3px; }
+::-webkit-scrollbar           { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track    { background: var(--color-void); }
 ::-webkit-scrollbar-thumb    { background: var(--color-border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
-*                             { scrollbar-width: thin; scrollbar-color: var(--color-border) var(--color-void); }
+* { scrollbar-width: thin; scrollbar-color: var(--color-border) var(--color-void); }
 
 /* ============================================================
    6. SELECTION
@@ -257,7 +255,6 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
    11. HYPERSPACE LAUNCH ANIMATIONS
    ============================================================ */
 
-/* Shockwave rings burst from center on submit */
 @keyframes hyperRing {
   0% {
     transform: translate(-50%, -50%) scale(0.05);
@@ -275,7 +272,6 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
   }
 }
 
-/* Full-screen white flash — the jump */
 @keyframes hyperFlash {
   0%   { opacity: 1; }
   35%  { opacity: 0.75; }
@@ -283,9 +279,8 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
   100% { opacity: 0; }
 }
 
-/* Vortex inward pull before flash */
 @keyframes vortexPull {
-  0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg);   opacity: 0.8; }
+  0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg);  opacity: 0.8; }
   100% { transform: translate(-50%, -50%) scale(0.05) rotate(720deg); opacity: 0; }
 }
 
@@ -352,7 +347,6 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
   }
 }
 
-/* Variant: each line slams in with slight stagger */
 @keyframes slamLine {
   0% {
     opacity: 0;
@@ -376,7 +370,7 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
 }
 
 /* ============================================================
-   15. WORLD TRANSITION — color shift overlay for arrival phases
+   15. WORLD TRANSITION
    ============================================================ */
 
 @keyframes worldShift {
@@ -386,7 +380,6 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
   100% { opacity: 0; }
 }
 
-/* The overlay that flashes during phase transition */
 .world-shift-overlay {
   position: fixed;
   inset: 0;
@@ -416,209 +409,30 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
 }
 
 /* ============================================================
-   17. DOOR ARCHETYPE COLORS
-   — Door 0: Surface  — cold cyan      — clear, rational, fast
-   — Door 1: Friction — amber          — contrarian, challenging
-   — Door 2: Depth    — deep purple    — hidden, ancient, alien
+   17. DOOR ARCHETYPE COLORS + HEARTBEAT ANIMATION
    ============================================================ */
+
+@keyframes heartbeat {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--door-border);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--door-accent), 0 0 20px var(--door-glow);
+  }
+}
+
+.door-locked {
+  animation: heartbeat 2s ease-in-out infinite;
+  background: rgba(8, 8, 8, 0.85);
+  border: 1px solid var(--door-border);
+}
 
 [data-door-index="0"] {
   --door-accent: #00F5FF;
-  --door-glow:   rgba(0, 245, 255, 0.15);
-  --door-border: rgba(0, 245, 255, 0.25);
+  --door-glow:   rgba(0, 245, 255, 0.3);
+  --door-border: rgba(0, 245, 255, 0.3);
 }
 
 [data-door-index="1"] {
   --door-accent: #FFB830;
-  --door-glow:   rgba(255, 184, 48, 0.15);
-  --door-border: rgba(255, 184, 48, 0.25);
-}
-
-[data-door-index="2"] {
-  --door-accent: #BF5AF2;
-  --door-glow:   rgba(191, 90, 242, 0.15);
-  --door-border: rgba(191, 90, 242, 0.25);
-}
-
-/* Door hover state — reactive to the accent */
-[data-door-index]:hover {
-  box-shadow:
-    0 0 0 1px var(--door-border),
-    0 0 40px var(--door-glow),
-    0 0 80px var(--door-glow);
-  transition:
-    box-shadow 0.25s var(--ease-out-expo),
-    transform   0.25s var(--ease-out-expo);
-  transform: translateY(-2px);
-}
-
-/* ============================================================
-   18. MIRROR PHASE — post-launch atmosphere
-   ============================================================ */
-
-/* Deep space purple backdrop for arrived state */
-.phase-mirror {
-  background: linear-gradient(
-    180deg,
-    var(--color-mirror-deep) 0%,
-    var(--color-mirror-bg)   60%,
-    #0d0025 100%
-  );
-}
-
-/* The mirror label — glowing brand moment */
-.mirror-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-purple);
-  text-shadow:
-    0 0 20px rgba(191,90,242,0.8),
-    0 0 60px rgba(191,90,242,0.4);
-  animation: loadingPulse 3s ease-in-out infinite;
-}
-
-/* Mirror text reveal container */
-.mirror-text {
-  color: #ffffff;
-  line-height: 1.55;
-  text-shadow: 0 0 40px rgba(191,90,242,0.2);
-}
-
-/* ============================================================
-   19. BIG BANG ENTRY — page load flash
-   ============================================================ */
-
-@keyframes bigBangBirth {
-  0%   { opacity: 0; transform: scale(1.08); filter: brightness(2); }
-  40%  { opacity: 1; filter: brightness(1.3); }
-  100% { opacity: 1; transform: scale(1);    filter: brightness(1); }
-}
-
-/* Applied to main content wrapper on first mount */
-.anim-birth {
-  animation: bigBangBirth 1.2s var(--ease-out-expo) forwards;
-}
-
-/* ============================================================
-   20. WARP SPEED LINES — CSS fallback for non-canvas elements
-   ============================================================ */
-
-@keyframes speedLine {
-  0%   { transform: scaleX(0) translateX(-50%); opacity: 0; }
-  30%  { opacity: 1; }
-  100% { transform: scaleX(1) translateX(0);    opacity: 0; }
-}
-
-.speed-line {
-  position: absolute;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0,245,255,0.6) 50%,
-    transparent 100%
-  );
-  animation: speedLine 0.4s var(--ease-in-expo) forwards;
-  transform-origin: left center;
-  pointer-events: none;
-}
-
-/* ============================================================
-   21. GLITCH — for submit error / tension moments
-   ============================================================ */
-
-@keyframes glitch {
-  0%, 100% {
-    clip-path: none;
-    transform: none;
-  }
-  10% {
-    clip-path: polygon(0 20%, 100% 20%, 100% 30%, 0 30%);
-    transform: translateX(-3px);
-    filter: hue-rotate(90deg);
-  }
-  20% {
-    clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%);
-    transform: translateX(3px);
-    filter: hue-rotate(-45deg);
-  }
-  30% {
-    clip-path: none;
-    transform: none;
-    filter: none;
-  }
-}
-
-.glitch {
-  animation: glitch 0.4s steps(2) forwards;
-}
-
-/* ============================================================
-   22. SUBMIT BUTTON STATE
-   ============================================================ */
-
-@keyframes launchReady {
-  0%, 100% {
-    box-shadow:
-      0 0 0 1px rgba(0,245,255,0.3),
-      0 0 20px rgba(0,245,255,0.1);
-  }
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(0,245,255,0.7),
-      0 0 40px rgba(0,245,255,0.3),
-      0 0 80px rgba(191,90,242,0.15);
-  }
-}
-
-.btn-launch {
-  animation: launchReady 2s ease-in-out infinite;
-}
-
-.btn-launch:active {
-  transform: scale(0.97);
-  animation: none;
-  box-shadow: 0 0 60px rgba(0,245,255,0.5), 0 0 120px rgba(191,90,242,0.3);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
-}
-
-/* ============================================================
-   23. SIGNAL PING — ambient aliveness
-   ============================================================ */
-
-@keyframes signalPing {
-  0%   { transform: scale(1);    opacity: 0.8; }
-  80%  { transform: scale(2.2);  opacity: 0; }
-  100% { transform: scale(2.2);  opacity: 0; }
-}
-
-.signal-ping {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid var(--color-cyan);
-  animation: signalPing 1.8s ease-out infinite;
-  pointer-events: none;
-}
-
-/* ============================================================
-   24. REDUCED MOTION
-   ============================================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration:       0.01ms !important;
-    animation-iteration-count: 1    !important;
-    transition-duration:      0.01ms !important;
-    scroll-behavior:          auto  !important;
-  }
-
-  #galaxy-canvas  { display: none; }
-  .anim-birth     { animation: none; opacity: 1; }
-  .world-shift-overlay { display: none; }
-}
+  --door-glow:   rgba(255,

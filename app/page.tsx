@@ -1,17 +1,6 @@
 // ============================================================
 // ZYVV — Main Page (WARP ENGINE · TALMUDIC PROTOCOL)
 // File: app/page.tsx
-//
-// PHASES:
-//   input        → user types situation
-//   loading      → MODE A Groq generating
-//   roast        → mirror truth typewriter reveal
-//   doors        → three doors shown, staggered reveal
-//   chosen       → brief transition after pick
-//   interrogation → user raises a doubt
-//   refining     → MODE B Groq generating
-//   refined      → critique + refined path + next vector
-//   share        → share card
 // ============================================================
 
 'use client'
@@ -61,6 +50,29 @@ const slamIn = {
     filter: 'blur(0px)',
     transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
   }),
+}
+
+// New Variants
+const doorSlam = {
+  hidden: (dir: 'top' | 'left' | 'right') => ({
+    opacity: 0,
+    scale: 1.15,
+    filter: 'blur(8px)',
+    y: dir === 'top' ? -60 : 0,
+    x: dir === 'left' ? -80 : dir === 'right' ? 80 : 0,
+  }),
+  visible: {
+    opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, x: 0,
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  },
+}
+
+const shockwaveRise = {
+  hidden: { opacity: 0, y: 120 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 },
+  },
 }
 
 const MAX_CHARS = 2000
@@ -382,6 +394,10 @@ export default function HomePage() {
   const [objection, setObjection] = useState('')
   const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
 
+  // Redesign States
+  const [isReturning, setIsReturning] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -393,6 +409,13 @@ export default function HomePage() {
   const arrivalColorRef = useRef<string>('rgba(0,0,0,0)')
 
   useWarpCanvas(canvasRef, warpPhaseRef, speedRef, arrivalColorRef)
+
+  // Visit check
+  useEffect(() => {
+    const visited = localStorage.getItem('zyvv_visited') === 'true'
+    setIsReturning(visited)
+    if (!visited) localStorage.setItem('zyvv_visited', 'true')
+  }, [])
 
   // Big bang → idle
   useEffect(() => {
@@ -591,54 +614,24 @@ export default function HomePage() {
     <>
       <canvas ref={canvasRef} id="galaxy-canvas" aria-hidden="true" />
 
+      {/* Heartbeat CSS Injection */}
+      <style jsx global>{`
+        @keyframes heartbeat {
+          0%, 100% { box-shadow: 0 0 0px rgba(0, 245, 255, 0.3); }
+          50% { box-shadow: 0 0 15px rgba(0, 245, 255, 0.8); }
+        }
+        .door-heartbeat { animation: heartbeat 2s infinite ease-in-out; }
+      `}</style>
+
       <main
         className="min-h-dvh min-h-screen flex flex-col items-center px-5 py-12"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 24px)' }}
       >
         <div className="w-full max-w-[420px] flex flex-col">
 
-          {/* ── HEADER ── */}
+          {/* ── HEADER (Non-Input) ── */}
           <AnimatePresence mode="wait">
-            {(phase === 'input' || phase === 'loading') && (
-              <motion.header
-                key="header"
-                variants={staggerContainer}
-                initial="hidden"
-                animate="visible"
-                exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-                className="mb-10"
-              >
-                <motion.div
-                  variants={slamIn}
-                  custom={0}
-                  className="font-mono font-black tracking-[-0.04em] text-white mb-3"
-                  style={{
-                    fontSize: 'clamp(64px, 20vw, 108px)',
-                    lineHeight: 0.88,
-                    textShadow:
-                      '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
-                  }}
-                >
-                  ZYVV
-                </motion.div>
-                <motion.p
-                  variants={fadeUp}
-                  custom={0.1}
-                  className="font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
-                  style={{
-                    color: '#00F5FF',
-                    textShadow: '0 0 20px rgba(0,245,255,0.4)',
-                  }}
-                >
-                  THREE DOORS CHATGPT WON&apos;T OPEN.
-                </motion.p>
-              </motion.header>
-            )}
-          </AnimatePresence>
-
-          {/* ── SMALL LOGO (post-input) ── */}
-          <AnimatePresence>
-            {phase !== 'input' && phase !== 'loading' && (
+            {phase !== 'input' && (
               <motion.div
                 key="logo-small"
                 initial={{ opacity: 0, x: -12 }}
@@ -670,24 +663,74 @@ export default function HomePage() {
                 initial="hidden"
                 animate="visible"
                 exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
+                className="w-full flex flex-col items-center"
               >
+                {/* 1. DOORS */}
                 <motion.div
-                  variants={fadeUp}
-                  custom={0.12}
-                  className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase mb-3"
-                  style={{ color: '#555' }}
+                  className="w-full mb-8"
+                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  BE HONEST.
+                  <div className="flex flex-col gap-3">
+                    {[
+                      { id: '1', color: '#00F5FF', name: 'DOOR 1', glyph: '◈', dir: 'top' },
+                      { id: '2', color: '#FFB830', name: 'DOOR 2', glyph: '◉', dir: 'left' },
+                      { id: '3', color: '#BF5AF2', name: 'DOOR 3', glyph: '⬡', dir: 'right' }
+                    ].map((door, i) => (
+                      <motion.div
+                        key={door.id}
+                        variants={doorSlam}
+                        custom={door.dir}
+                        initial={isReturning ? 'visible' : 'hidden'}
+                        animate="visible"
+                        className="w-full bg-[#080808] border border-[#1e1e1e] h-[80px] flex items-center justify-between px-6 font-mono uppercase tracking-widest door-heartbeat"
+                        style={{
+                          borderColor: `${door.color}4D`,
+                          animationDelay: `${i * 0.4}s`,
+                          marginLeft: i % 2 === 1 ? '16px' : '0px',
+                          marginRight: i % 2 === 0 ? '16px' : '0px'
+                        }}
+                      >
+                        <span style={{ color: door.color }}>{door.name}</span>
+                        <span style={{ color: door.color }}>{door.glyph}</span>
+                        <span style={{ color: door.color, opacity: 0.5 }}>LOCKED</span>
+                      </motion.div>
+                    ))}
+                  </div>
                 </motion.div>
 
-                <motion.div variants={fadeUp} custom={0.18} className="relative">
+                {/* 2. ZYVV LOGO (Appears after doors) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="font-mono font-black tracking-[-0.04em] text-white mb-8"
+                  style={{ fontSize: 'clamp(48px, 15vw, 80px)', lineHeight: 0.8 }}
+                >
+                  ZYVV
+                </motion.div>
+
+                {/* 3. INPUT BLOCK */}
+                <motion.div 
+                  variants={shockwaveRise} 
+                  className="w-full relative"
+                >
                   <textarea
                     ref={textareaRef}
                     value={situation}
                     onChange={handleTextareaChange}
                     onKeyDown={handleKeyDown}
-                    placeholder="I know what I need to do. I've known for months. I still haven't done it."
+                    placeholder="Be honest."
                     rows={4}
+                    onFocus={() => {
+                      setIsFocused(true)
+                      textareaRef.current!.style.borderColor = '#00F5FF'
+                    }}
+                    onBlur={() => {
+                      setIsFocused(false)
+                      textareaRef.current!.style.borderColor = '#1e1e1e'
+                    }}
                     className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm"
                     style={{
                       background: 'rgba(6,6,8,0.88)',
@@ -697,127 +740,33 @@ export default function HomePage() {
                       outline: 'none',
                       resize: 'none',
                       minHeight: 120,
-                      transition: 'border-color 0.2s, box-shadow 0.2s',
                     }}
-                    onFocus={(e) => {
-                      if (!error) e.currentTarget.style.borderColor = '#00F5FF'
-                      e.currentTarget.style.boxShadow =
-                        '0 0 22px rgba(0,245,255,0.13)'
-                    }}
-                    onBlur={(e) => {
-                      if (!error) e.currentTarget.style.borderColor = '#1e1e1e'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }}
-                    autoFocus
-                    spellCheck
-                    aria-label="BE HONEST."
                   />
-                  {isNearLimit && (
-                    <div
-                      className="absolute bottom-3 right-3 font-mono text-[10px]"
-                      style={{
-                        color:
-                          situation.length >= MAX_CHARS - 50 ? '#FF2D55' : '#444',
-                      }}
-                    >
-                      {charsLeft}
-                    </div>
-                  )}
-                </motion.div>
-
-                <motion.div variants={fadeUp} custom={0.21} className="mt-2">
-                  <input
-                    type="text"
-                    value={tried}
-                    onChange={(e) => setTried(e.target.value)}
-                    placeholder="What have you already tried? (optional)"
-                    className="w-full font-mono text-[13px] px-4 py-3 rounded-sm"
-                    style={{
-                      background: 'rgba(6,6,8,0.88)',
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid #1e1e1e',
-                      color: '#fff',
-                      outline: 'none',
-                      transition: 'border-color 0.2s',
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.borderColor = '#00F5FF')
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.borderColor = '#1e1e1e')
-                    }
-                  />
-                </motion.div>
-
-                <AnimatePresence>
-                  {error && (
-                    <motion.p
-                      key="error"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="font-mono text-[10px] mt-2 tracking-[0.06em]"
-                      style={{ color: '#FF2D55' }}
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-
-                <motion.div variants={fadeUp} custom={0.26} className="mt-5">
+                  
+                  {/* Button */}
                   <button
-                    ref={submitBtnRef}
                     onClick={handleSubmit}
                     disabled={!canSubmit}
-                    className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                    className="w-full mt-4 font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm transition-all"
                     style={{
-                      background: canSubmit
-                        ? 'linear-gradient(135deg, #00F5FF 0%, #0088aa 100%)'
-                        : '#0a0a0a',
+                      background: canSubmit ? '#fff' : '#0a0a0a',
                       color: canSubmit ? '#000' : '#2a2a2a',
-                      border: canSubmit ? 'none' : '1px solid #1a1a1a',
-                      cursor: canSubmit ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.25s',
-                      boxShadow: canSubmit
-                        ? '0 0 30px rgba(0,245,255,0.2)'
-                        : 'none',
+                      border: '1px solid #1e1e1e',
+                      cursor: canSubmit ? 'pointer' : 'not-allowed'
                     }}
-                    onMouseEnter={(e) => {
-                      if (canSubmit) {
-                        e.currentTarget.style.boxShadow =
-                          '0 0 60px rgba(0,245,255,0.45), 0 0 120px rgba(191,90,242,0.2)'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = canSubmit
-                        ? '0 0 30px rgba(0,245,255,0.2)'
-                        : 'none'
-                      e.currentTarget.style.transform = 'none'
-                    }}
-                    aria-label="Open the portal"
                   >
                     OPEN THE PORTAL
                   </button>
                 </motion.div>
 
-                <motion.p
-                  variants={fadeUp}
-                  custom={0.32}
-                  className="font-mono text-[10px] text-center mt-3 tracking-[0.06em]"
-                  style={{ color: '#2a2a2a' }}
-                >
-                  ⌘↵ to submit · No account required
-                </motion.p>
-
-                <motion.div
-                  variants={fadeUp}
-                  custom={0.38}
-                  className="mt-10 flex justify-center"
-                >
+                {/* 4. FOOTER */}
+                <footer className="mt-16 flex flex-col items-center gap-1" aria-label="ZYVV footer">
                   <PortalCounter />
-                </motion.div>
+                  <span className="font-mono text-[10px] tracking-[0.10em] uppercase"
+                    style={{ color: '#1a1a1a' }}>
+                    ZYVV · Not advice. A way out.
+                  </span>
+                </footer>
               </motion.section>
             )}
 
@@ -830,22 +779,9 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col items-center justify-center py-24"
-                aria-live="polite"
               >
-                <div
-                  className="font-mono text-[10px] font-black tracking-[0.22em] uppercase mb-8"
-                  style={{
-                    color: '#00F5FF',
-                    textShadow: '0 0 30px rgba(0,245,255,0.5)',
-                    animation: 'loadingPulse 2s ease-in-out infinite',
-                  }}
-                >
+                <div className="font-mono text-[10px] font-black tracking-[0.22em] uppercase mb-8" style={{ color: '#00F5FF' }}>
                   THE VOID IS THINKING
-                </div>
-                <div className="flex gap-3">
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
                 </div>
               </motion.section>
             )}
@@ -859,23 +795,7 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
-                  style={{
-                    color: '#BF5AF2',
-                    textShadow: '0 0 20px rgba(191,90,242,0.4)',
-                  }}
-                >
-                  THE MIRROR
-                </motion.div>
-
-                <MirrorReveal
-                  text={mirror}
-                  onComplete={() => setPhase('doors')}
-                />
+                <MirrorReveal text={mirror} onComplete={() => setPhase('doors')} />
               </motion.section>
             )}
 
@@ -888,35 +808,7 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                <div className="mb-5">
-                  <div
-                    className="font-mono text-[9px] font-black tracking-[0.18em] uppercase mb-1"
-                    style={{ color: '#2a2a2a' }}
-                  >
-                    BE HONEST.
-                  </div>
-                  <p
-                    className="font-mono text-[11px] leading-[1.6]"
-                    style={{ color: '#333' }}
-                  >
-                    {situation.trim().slice(0, 100)}
-                    {situation.trim().length > 100 ? '…' : ''}
-                  </p>
-                </div>
-
-                <div
-                  className="border-l-2 pl-4 mb-8"
-                  style={{ borderColor: '#BF5AF2' }}
-                >
-                  <p
-                    className="font-mono text-[11px] leading-[1.7]"
-                    style={{ color: '#666' }}
-                  >
-                    {mirror}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-4 mb-8">
+                <div className="mb-8">
                   {doors.map((door, i) => (
                     <Door
                       key={door.id ?? i}
@@ -929,24 +821,6 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-
-                <AnimatePresence>
-                  {revealedCount >= doors.length &&
-                    doors.length > 0 &&
-                    !chosenDoor && (
-                      <motion.div
-                        key="choose-prompt"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="font-mono text-[10px] tracking-[0.18em] uppercase text-center mb-8"
-                        style={{ color: '#2a2a2a' }}
-                      >
-                        YOUR DOOR
-                      </motion.div>
-                    )}
-                </AnimatePresence>
               </motion.section>
             )}
 
@@ -959,250 +833,29 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div
-                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
-                  style={{
-                    color: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
-                    textShadow: `0 0 20px ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}66`,
-                  }}
-                >
-                  INTERROGATION
-                </div>
-
-                <p
-                  className="font-mono text-[12px] leading-[1.65] mb-6"
-                  style={{ color: '#555' }}
-                >
-                  You chose{' '}
-                  <span
-                    style={{
-                      color: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
-                    }}
-                  >
-                    {chosenDoor.title}
-                  </span>
-                  . What&apos;s your doubt?
-                </p>
-
                 <textarea
                   value={objection}
                   onChange={(e) => setObjection(e.target.value)}
-                  placeholder="But I don't have enough time for that..."
-                  rows={3}
-                  className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm mb-4"
-                  style={{
-                    background: 'rgba(6,6,8,0.88)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid #1e1e1e',
-                    color: '#fff',
-                    outline: 'none',
-                    resize: 'none',
-                    transition: 'border-color 0.2s',
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.borderColor =
-                      DOOR_CONFIGS[chosenDoor.door_type].glowColor)
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.borderColor = '#1e1e1e')
-                  }
-                  autoFocus
+                  placeholder="Raise an objection..."
+                  className="w-full bg-transparent border-b border-[#333] py-2 font-mono text-[14px]"
                 />
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleInterrogate}
-                    disabled={objection.trim().length < 4}
-                    className="flex-1 font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
-                    style={{
-                      background:
-                        objection.trim().length >= 4
-                          ? DOOR_CONFIGS[chosenDoor.door_type].glowColor
-                          : '#0a0a0a',
-                      color:
-                        objection.trim().length >= 4 ? '#000' : '#2a2a2a',
-                      border:
-                        objection.trim().length >= 4
-                          ? 'none'
-                          : '1px solid #1a1a1a',
-                      cursor:
-                        objection.trim().length >= 4
-                          ? 'pointer'
-                          : 'not-allowed',
-                      transition: 'all 0.25s',
-                    }}
-                  >
-                    INTERROGATE
-                  </button>
-                  <button
-                    onClick={() => setPhase('share')}
-                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-5 py-4 rounded-sm"
-                    style={{
-                      color: '#333',
-                      border: '1px solid #1a1a1a',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    SKIP
-                  </button>
-                </div>
-              </motion.section>
-            )}
-
-            {/* REFINING */}
-            {phase === 'refining' && (
-              <motion.section
-                key="refining-phase"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center justify-center py-24"
-              >
-                <div
-                  className="font-mono text-[10px] font-black tracking-[0.22em] uppercase mb-8"
-                  style={{
-                    color: '#BF5AF2',
-                    textShadow: '0 0 30px rgba(191,90,242,0.5)',
-                    animation: 'loadingPulse 2s ease-in-out infinite',
-                  }}
-                >
-                  STRESS-TESTING YOUR DOUBT
-                </div>
-                <div className="flex gap-3">
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
-                </div>
+                <button onClick={handleInterrogate}>REFINE</button>
               </motion.section>
             )}
 
             {/* REFINED */}
-            {phase === 'refined' && refinement && chosenDoor && (
+            {phase === 'refined' && refinement && (
               <motion.section
                 key="refined-phase"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
               >
-                <div
-                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
-                  style={{ color: '#BF5AF2' }}
-                >
-                  REFINED PATH
-                </div>
-
-                {/* Diagnosis */}
-                <div
-                  className="border-l-2 pl-4 mb-6"
-                  style={{ borderColor: '#FF2D55' }}
-                >
-                  <div
-                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
-                    style={{ color: '#FF2D5566' }}
-                  >
-                    DIAGNOSIS
-                  </div>
-                  <p
-                    className="font-mono text-[12px] leading-[1.65]"
-                    style={{ color: '#888' }}
-                  >
-                    {refinement.critique}
-                  </p>
-                </div>
-
-                {/* Refined path */}
-                <div
-                  className="border-l-2 pl-4 mb-6"
-                  style={{
-                    borderColor: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
-                  }}
-                >
-                  <div
-                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
-                    style={{
-                      color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}88`,
-                    }}
-                  >
-                    REFINED PATH
-                  </div>
-                  <p
-                    className="font-mono text-[12px] leading-[1.65]"
-                    style={{ color: '#ccc' }}
-                  >
-                    {refinement.refined_path}
-                  </p>
-                </div>
-
-                {/* Next vector */}
-                <div
-                  className="border-l-2 pl-4 mb-8"
-                  style={{ borderColor: '#333' }}
-                >
-                  <div
-                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
-                    style={{ color: '#333' }}
-                  >
-                    NEXT QUESTION
-                  </div>
-                  <p
-                    className="font-mono text-[12px] leading-[1.65]"
-                    style={{ color: '#555' }}
-                  >
-                    {refinement.next_interrogation_vector}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => setPhase('share')}
-                  className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, #BF5AF2 0%, #7a22cc 100%)',
-                    color: '#000',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 0 30px rgba(191,90,242,0.25)',
-                  }}
-                >
-                  CONTINUE →
-                </button>
-              </motion.section>
-            )}
-
-            {/* SHARE */}
-            {phase === 'share' && chosenDoor && (
-              <motion.section
-                key="share-phase"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 16 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="h-px mb-8" style={{ background: '#141414' }} />
-                <ShareCard
-                  situation={situation.trim()}
-                  roast={mirror}
-                  doors={doors}
-                  chosenDoor={chosenDoor}
-                  onDone={handleReset}
-                />
+                <p>{refinement.content}</p>
+                <button onClick={handleReset}>RESET</button>
               </motion.section>
             )}
 
           </AnimatePresence>
-
-          <footer className="mt-16 flex justify-center" aria-label="ZYVV footer">
-            <span
-              className="font-mono text-[10px] tracking-[0.10em] uppercase"
-              style={{ color: '#1a1a1a' }}
-            >
-              ZYVV · Not advice. A mirror.
-            </span>
-          </footer>
-
         </div>
       </main>
     </>
