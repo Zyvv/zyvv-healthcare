@@ -323,7 +323,7 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
           setDone(true)
           setTimeout(onComplete, 1600)
         }
-      }, 20)
+      }, 8)
       return () => clearInterval(interval)
     }, 700)
 
@@ -914,6 +914,19 @@ export default function HomePage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+                                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  onClick={() => {
+                    const text = `ZYVV just read me: "${mirror}" — zyvv.vercel.app`
+                    navigator.clipboard.writeText(text)
+                  }}
+                  className="w-full font-mono text-[10px] tracking-[0.18em] uppercase py-3 rounded-sm mt-2"
+                  style={{ color: '#333', border: '1px solid #1a1a1a', background: 'transparent', cursor: 'pointer' }}
+                >
+                  COPY THE MIRROR →
+                </motion.button>
               </motion.section>
             )}
 
