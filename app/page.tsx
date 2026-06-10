@@ -1113,15 +1113,7 @@ export default function HomePage() {
 
           </AnimatePresence>
 
-          <footer className="mt-16 flex flex-col items-center gap-1" aria-label="ZYVV footer">
-            <PortalCounter />
-            <span
-              className="font-mono text-[10px] tracking-[0.10em] uppercase"
-              style={{ color: '#f9f1f1' }}
-            >
-              ZYVV · Not advice. A way out.
-            </span>
-          </footer>
+
 
         </div>
       </main>

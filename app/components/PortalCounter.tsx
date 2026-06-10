@@ -148,6 +148,7 @@ export default function PortalCounter() {
           {formatCount(displayCount)}
         </span>
         {' '}PORTALS OPENED
+              BE THE NEXT ONE.
       </span>
 
       {/* Keyframe for ping — inlined since we can't guarantee globals.css ping exists */}
