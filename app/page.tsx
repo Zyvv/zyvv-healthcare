@@ -377,14 +377,10 @@ export default function HomePage() {
   const [mirror, setMirror] = useState('')
   const [doors, setDoors] = useState<DoorType[]>([])
   const [situationId, setSituationId] = useState<number | null>(null)
-  const [choiceId, setChoiceId] = useState<number | null>(null)
   const [chosenDoor, setChosenDoor] = useState<DoorType | null>(null)
   const [revealedCount, setRevealedCount] = useState(0)
   const [objection, setObjection] = useState('')
   const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
-
-  const [isFocused, setIsFocused] = useState(false)
-  const [isReturning, setIsReturning] = useState(false)
 
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -439,12 +435,6 @@ export default function HomePage() {
       warpPhaseRef.current = 'arrived'
     }
   }, [phase])
-
-    useEffect(() => {
-    const visited = localStorage.getItem('zyvv_visited') === 'true'
-    setIsReturning(visited)
-    if (!visited) localStorage.setItem('zyvv_visited', 'true')
-  }, [])
 
   // ── MODE A: submit ───────────────────────────────────────────
 
@@ -554,7 +544,6 @@ export default function HomePage() {
     setMirror('')
     setDoors([])
     setSituationId(null)
-    setChoiceId(null)
     setChosenDoor(null)
     setError('')
     setRevealedCount(0)
@@ -630,26 +619,6 @@ export default function HomePage() {
                       '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
                   }}
                 >
-
-                    const doorSlam = {
-    hidden: (dir: 'top' | 'left' | 'right') => ({
-      opacity: 0, scale: 1.15, filter: 'blur(8px)',
-      y: dir === 'top' ? -60 : 0,
-      x: dir === 'left' ? -80 : dir === 'right' ? 80 : 0,
-    }),
-    visible: {
-      opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, x: 0,
-      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
-    },
-  }
-
-  const shockwaveRise = {
-    hidden: { opacity: 0, y: 120 },
-    visible: {
-      opacity: 1, y: 0,
-      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 },
-    },
-  }
                   ZYVV
                 </motion.div>
                 <motion.p
@@ -695,7 +664,13 @@ export default function HomePage() {
 
             {/* INPUT */}
             {phase === 'input' && (
-              
+              <motion.section
+                key="input-phase"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
+              >
                 <motion.div
                   variants={fadeUp}
                   custom={0.12}
@@ -1212,7 +1187,6 @@ export default function HomePage() {
                   roast={mirror}
                   doors={doors}
                   chosenDoor={chosenDoor}
-                  choiceId={choiceId}
                   onDone={handleReset}
                 />
               </motion.section>
@@ -1220,10 +1194,13 @@ export default function HomePage() {
 
           </AnimatePresence>
 
-                    <footer className="mt-16 flex flex-col items-center gap-1" aria-label="ZYVV footer">
-            <PortalCounter />
-            <span className="font-mono text-[10px] tracking-[0.10em] uppercase"
-              style={{ color: '#1a1a1a' }}>ZYVV · Not advice. A way out.</span>
+          <footer className="mt-16 flex justify-center" aria-label="ZYVV footer">
+            <span
+              className="font-mono text-[10px] tracking-[0.10em] uppercase"
+              style={{ color: '#1a1a1a' }}
+            >
+              ZYVV · Not advice. A mirror.
+            </span>
           </footer>
 
         </div>
