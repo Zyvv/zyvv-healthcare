@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('[/api/generate] Error:', err)
     return NextResponse.json(
-      { error: 'Something went wrong. The void is temporarily unavailable.' },
+      { error: err?.message || 'Unknown error', stack: err?.stack },
       { status: 500 }
     )
   }
