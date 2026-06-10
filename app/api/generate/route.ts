@@ -1,8 +1,6 @@
 // ============================================================
 // ZYVV — Generate API Route
 // File: app/api/generate/route.ts
-//
-// Enhanced with Data Moat: Structured JSON parsing + richer metadata
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,17 +13,15 @@ import type {
   InterrogateResponse,
 } from '@/lib/types'
 
-// Run on Vercel Edge for lowest latency
 export const runtime = 'edge'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
-    // ── MODE B: INTERROGATION ────────────────────────────────
+    // MODE B: INTERROGATION
     if (body.mode === 'INTERROGATION') {
-      const { previous_situation, selected_door, user_objection } =
-        body as InterrogateRequest
+      const { previous_situation, selected_door, user_objection } = body as InterrogateRequest
 
       if (!previous_situation || !selected_door || !user_objection) {
         return NextResponse.json(
@@ -40,16 +36,13 @@ export async function POST(req: NextRequest) {
 
       const result = await interrogateDoor(previous_situation, selected_door, user_objection)
 
-      const response: InterrogateResponse = {
+      return NextResponse.json({
         refinement_block: result.refinement_block,
-      }
-
-      return NextResponse.json(response, { status: 200 })
+      }, { status: 200 })
     }
 
-    // ── MODE A: INITIALIZATION ───────────────────────────────
+    // MODE A: INITIALIZATION
     const { situation, session_id } = body as GenerateRequest
-
     const trimmed = situation?.trim()
 
     if (!trimmed) {
@@ -62,11 +55,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Situation too long. Keep it under 2000 characters.' }, { status: 400 })
     }
 
-    // Generate via Groq
     const groqResult = await generateDoors(trimmed)
     const { roast, doors, structuredData } = groqResult
 
-    // Save to database
     const situation_id = await saveSituation({
       content: trimmed,
       session_id: session_id ?? null,
@@ -85,17 +76,14 @@ export async function POST(req: NextRequest) {
       roast,
       doors: savedDoors,
       situation_id,
-      structuredData,        // Safe because we updated the type
+      structuredData,
     }
 
     return NextResponse.json(response, { status: 200 })
   } catch (err: any) {
     console.error('[/api/generate] Error:', err)
-
     return NextResponse.json(
-      { 
-        error: 'Something went wrong. The void is temporarily unavailable.' 
-      },
+      { error: 'Something went wrong. The void is temporarily unavailable.' },
       { status: 500 }
     )
   }
