@@ -657,13 +657,15 @@ export default function HomePage() {
                       initial={isReturning ? 'visible' : 'hidden'}
                       animate="visible"
                       transition={{ delay: isReturning ? 0 : d.delay }}
-                      className={`flex items-center justify-between px-4 mb-2 rounded-sm ${d.offset}`}
+                      className="flex items-center justify-between px-4 mb-2 rounded-sm"
                       style={{
                         height: 80,
                         background: 'rgba(8,8,8,0.85)',
                         border: `1px solid ${d.color}4D`,
                         animation: `${d.animName} 2s ease-in-out ${d.animDelay} infinite`,
-                      }}
+                        marginRight: d.label === 'DOOR 2' ? 0 : 32,
+                        marginLeft: d.label === 'DOOR 2' ? 32 : 0,
+                    }}
                     >
                       <span
                         className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
