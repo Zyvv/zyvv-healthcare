@@ -383,6 +383,9 @@ export default function HomePage() {
   const [objection, setObjection] = useState('')
   const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
 
+  const [isFocused, setIsFocused] = useState(false)
+  const [isReturning, setIsReturning] = useState(false)
+
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -436,6 +439,12 @@ export default function HomePage() {
       warpPhaseRef.current = 'arrived'
     }
   }, [phase])
+
+    useEffect(() => {
+    const visited = localStorage.getItem('zyvv_visited') === 'true'
+    setIsReturning(visited)
+    if (!visited) localStorage.setItem('zyvv_visited', 'true')
+  }, [])
 
   // ── MODE A: submit ───────────────────────────────────────────
 
@@ -621,6 +630,26 @@ export default function HomePage() {
                       '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
                   }}
                 >
+
+                    const doorSlam = {
+    hidden: (dir: 'top' | 'left' | 'right') => ({
+      opacity: 0, scale: 1.15, filter: 'blur(8px)',
+      y: dir === 'top' ? -60 : 0,
+      x: dir === 'left' ? -80 : dir === 'right' ? 80 : 0,
+    }),
+    visible: {
+      opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, x: 0,
+      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+    },
+  }
+
+  const shockwaveRise = {
+    hidden: { opacity: 0, y: 120 },
+    visible: {
+      opacity: 1, y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 },
+    },
+  }
                   ZYVV
                 </motion.div>
                 <motion.p
@@ -666,13 +695,7 @@ export default function HomePage() {
 
             {/* INPUT */}
             {phase === 'input' && (
-              <motion.section
-                key="input-phase"
-                variants={staggerContainer}
-                initial="hidden"
-                animate="visible"
-                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
-              >
+              
                 <motion.div
                   variants={fadeUp}
                   custom={0.12}
