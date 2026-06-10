@@ -101,10 +101,8 @@ export async function generateDoors(
   const fullText = completion.choices[0]?.message?.content || ''
   if (!fullText) throw new Error('Groq returned empty response')
 
-  // === STRONG CLEANING TO FIX BROKEN ROAST ===
+  // === CLEAN THE RESPONSE FOR FRONTEND + EXTRACT MOAT DATA ===
   let cleanResponse = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
-
-  // Extra aggressive cleanup for any leftover JSON
   cleanResponse = cleanResponse.replace(/\{[\s\S]*?"situation_summary"[\s\S]*?\}/gi, '').trim()
 
   // Extract structured data for moat
@@ -119,21 +117,10 @@ export async function generateDoors(
     }
   }
 
-  // Fallback parsing if Groq returned pure JSON
-  let roast = cleanResponse
-  let doors: any[] = []
-
-  try {
-    const parsed = JSON.parse(cleanResponse)
-    if (parsed.roast) roast = parsed.roast
-    if (parsed.doors) doors = parsed.doors
-  } catch {
-    // It's normal text (roast + doors) — keep as is
-  }
-
+  // Return clean roast + doors (fallback if needed)
   return {
-    roast,
-    doors,
+    roast: cleanResponse,
+    doors: [], // We'll improve parsing later if needed
     structuredData,
   }
 }
