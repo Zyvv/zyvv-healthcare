@@ -115,7 +115,7 @@ export async function generateDoors(
   // Strip JSON block from human-readable text
   const roast = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
 
-  // Parse doors from structuredData (the moat JSON is the source of truth)
+  // Parse doors from structuredData (moat JSON is source of truth)
   const doors: Omit<Door, 'id' | 'situation_id'>[] = structuredData?.doors?.map(
     (d: { type: DoorType; title: string; description: string; why_it_works: string; potential_objections?: string[] }) => ({
       door_type: d.type as DoorType,
@@ -138,4 +138,65 @@ export async function generateDoors(
 const INTERROGATION_PROMPT = `You are ZYVV Engine in INTERROGATION MODE.
 
 A user selected a door and raised an objection. Do not validate their doubt.
-Treat the objection as a data point — a cognitive
+Treat the objection as a data point — a cognitive reveal.
+Diagnose why this objection emerged from this specific door choice.
+Output a refined path that uses the constraint the objection reveals as a mechanism, not an obstacle.
+
+Rules:
+- The refined_path must be stronger because of the objection.
+- Return valid JSON only.
+
+Return ONLY this JSON:
+{
+  "refinement_block": {
+    "critique": "string",
+    "refined_path": "string",
+    "next_interrogation_vector": "string",
+    "outcome_tracking_hint": "string"
+  }
+}`
+
+export interface RefinementBlock {
+  critique: string
+  refined_path: string
+  next_interrogation_vector: string
+  outcome_tracking_hint: string
+}
+
+export interface GroqInterrogateResult {
+  refinement_block: RefinementBlock
+}
+
+export async function interrogateDoor(
+  previous_situation: string,
+  selected_door: DoorType,
+  user_objection: string
+): Promise<GroqInterrogateResult> {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    temperature: 0.85,
+    max_tokens: 1024,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: INTERROGATION_PROMPT },
+      {
+        role: 'user',
+        content: `Previous situation: ${previous_situation.trim()}\n\nSelected door: ${selected_door}\n\nUser objection: ${user_objection.trim()}`,
+      },
+    ],
+  })
+
+  const raw = completion.choices[0]?.message?.content
+  if (!raw) throw new Error('Groq returned empty response')
+
+  let parsed: GroqInterrogateResult
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw new Error('Groq response was not valid JSON')
+  }
+
+  return parsed
+}
