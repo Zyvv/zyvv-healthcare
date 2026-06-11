@@ -59,12 +59,25 @@ Full response format:
   "doors": [
     {
       "type": "conventional",
-      "title": "...",
-      "description": "...",
-      "why_it_works": "...",
-      "potential_objections": ["likely objection 1", "likely objection 2"]
+      "title": "4-7 words, must reference a specific detail from the situation",
+      "description": "2-3 sentences. Must name a specific action, number, platform, or person from the situation. No sentence that could apply to a different situation.",
+      "why_it_works": "1-2 sentences on the exact mechanism for this situation.",
+      "potential_objections": ["specific objection 1", "specific objection 2"]
     },
     {
+      "type": "contrarian",
+      "title": "4-7 words, must reference a specific detail from the situation",
+      "description": "2-3 sentences. Name the hidden flaw in the obvious path first. Build around that flaw using specifics from the situation.",
+      "why_it_works": "1-2 sentences on the exact mechanism for this situation.",
+      "potential_objections": ["specific objection 1", "specific objection 2"]
+    },
+    {
+      "type": "alien",
+      "title": "4-7 words, must reference a specific detail from the situation",
+      "description": "2-3 sentences. Name the wrong question first. Name the right question. Build the door from the right question using specifics from the situation.",
+      "why_it_works": "1-2 sentences on the exact mechanism for this situation.",
+      "potential_objections": ["specific objection 1", "specific objection 2"]
+    },
       "type": "contrarian",
       "title": "...",
       "description": "...",
