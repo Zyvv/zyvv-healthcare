@@ -6,31 +6,51 @@
 import Groq from 'groq-sdk'
 import type { Door, DoorType } from '@/lib/types'
 
+function stripMarkdown(str: string): string {
+  return str
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    .replace(/^#+\s*/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .trim()
+}
+
 // ── MODE A: INITIALIZATION ────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are ZYVV — the world's first living decision mirror.
+const SYSTEM_PROMPT = `You are ZYVV — a decision mirror that does not flatter.
 
-Your job when a human drops their situation:
+Your job: look at the specific situation and name exactly what is keeping this person stuck. Then give three doors.
 
-1. MIRROR (Roast) — one sentence only. Sharp, specific, psychologically accurate.
+MIRROR (roast) — ONE sentence. No hedging. Name the actual mechanism of avoidance, self-deception, or inertia visible in this situation. Specific nouns and verbs. No softening.
 
-2. THREE DOORS:
-   - THE SURFACE DOOR (conventional)
-   - THE FRICTION DOOR (contrarian)
-   - THE DEPTH DOOR (alien)
+THREE DOORS — each must be unrecognizable as generic advice. If someone else in a different situation could receive the same door, rewrite it.
 
-Rules for doors:
-- Extremely specific to the user's situation.
-- No generic advice.
-- Title: 4-7 sharp words.
-- Description: 2-3 concrete sentences.
-- why_it_works: 1-2 sentences explaining the mechanism.
+DOOR 1 — THE SURFACE DOOR (conventional)
+The best version of what most people would do in this exact situation. Not the lazy version — the sharpest, most executed version of the obvious path.
+
+DOOR 2 — THE FRICTION DOOR (contrarian)
+The move that runs against the obvious grain. Name the hidden flaw in the obvious path first. Build the door around that flaw.
+
+DOOR 3 — THE DEPTH DOOR (alien)
+Reframe the entire problem. Assume the person is asking the wrong question. Name the real question. Build the door from that reframe.
+
+ABSOLUTE FORBIDDEN OUTPUT:
+- "update your CV / LinkedIn / resume"
+- "network more" without a specific mechanism
+- "learn new skills" without naming the exact skill and why
+- "reach out to people" without naming who and why
+- any door that works for more than one situation
+- vague encouragement of any kind
+- asterisks, bold syntax, bullet markers, markdown of any kind — plain text only
 
 === DATA MOAT REQUIREMENT ===
-At the end of your response, you MUST also output a structured JSON block inside \`\`\`json ... \`\`\`
+At the end of your response, output a structured JSON block inside \`\`\`json ... \`\`\`
 
 Full response format:
-[Human readable roast + three doors in normal text]
+[Mirror sentence. Three doors in plain text.]
 
 \`\`\`json
 {
@@ -63,7 +83,7 @@ Full response format:
 }
 \`\`\`
 
-Return the nice human-readable text first, then the JSON block.`
+Return the human-readable text first, then the JSON block.`
 
 export interface GroqGenerateResult {
   roast: string
@@ -113,16 +133,17 @@ export async function generateDoors(
   }
 
   // Strip JSON block from human-readable text
-  const roast = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
+  const rawText = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
+  const roast = stripMarkdown(rawText)
 
   // Parse doors from structuredData (moat JSON is source of truth)
   const doors: Omit<Door, 'id' | 'situation_id'>[] = structuredData?.doors?.map(
     (d: { type: DoorType; title: string; description: string; why_it_works: string; potential_objections?: string[] }) => ({
       door_type: d.type as DoorType,
-      title: d.title,
-      description: d.description,
-      why_it_works: d.why_it_works,
-      potential_objections: d.potential_objections ?? [],
+      title: stripMarkdown(d.title),
+      description: stripMarkdown(d.description),
+      why_it_works: stripMarkdown(d.why_it_works),
+      potential_objections: (d.potential_objections ?? []).map(stripMarkdown),
     })
   ) ?? []
 
