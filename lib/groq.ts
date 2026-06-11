@@ -45,7 +45,7 @@ ABSOLUTE FORBIDDEN OUTPUT:
 - any door that works for more than one situation
 - vague encouragement of any kind
 - asterisks, bold syntax, bullet markers, markdown of any kind — plain text only
-
+SPECIFICITY TEST: Before writing each door, ask — could this door appear in a generic article? If yes, rewrite it. The door must contain at least one detail that only makes sense for THIS situation.
 === DATA MOAT REQUIREMENT ===
 At the end of your response, output a structured JSON block inside \`\`\`json ... \`\`\`
 
