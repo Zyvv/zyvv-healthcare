@@ -134,7 +134,9 @@ export async function generateDoors(
 
   // Strip JSON block from human-readable text
   const rawText = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
-  const roast = stripMarkdown(rawText)
+  const roast = structuredData?.roast_key_insights?.[0]
+  ? stripMarkdown(structuredData.roast_key_insights[0])
+  : stripMarkdown(rawText.split('\n')[0].trim()))
 
   // Parse doors from structuredData (moat JSON is source of truth)
   const doors: Omit<Door, 'id' | 'situation_id'>[] = structuredData?.doors?.map(
