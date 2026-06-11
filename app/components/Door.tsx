@@ -196,9 +196,9 @@ export default function Door({
                 {door.description}
               </p>
 
-              {/* Why it works — only on chosen door */}
+              {/* Why it works — visible on all revealed doors */}
               <AnimatePresence>
-                {isChosen && (
+                {isRevealed && (
                   <motion.div
                     variants={whyVariants}
                     initial="hidden"
