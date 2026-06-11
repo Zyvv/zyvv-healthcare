@@ -133,6 +133,7 @@ export async function generateDoors(
   }
 
   // Strip JSON block from human-readable text
+  const rawText = fullText.replace(/```json[\s\S]*?```/gi, '').trim()
   const roast = stripMarkdown(rawText.split('\n')[0].trim())
 
   // Parse doors from structuredData (moat JSON is source of truth)
