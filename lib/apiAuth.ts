@@ -1,4 +1,3 @@
-import { createHash } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -15,8 +14,12 @@ export interface AuthResult {
   status?: number
 }
 
-function hashKey(key: string): string {
-  return createHash('sha256').update(key).digest('hex')
+async function hashKey(key: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(key)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 export async function authenticateRequest(req: Request): Promise<AuthResult> {
@@ -28,7 +31,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
   if (!key) {
     return { ok: false, error: 'Empty API key', status: 401 }
   }
-  const keyHash = hashKey(key)
+  const keyHash = await hashKey(key)
   const { data, error } = await supabaseAdmin
     .from('api_keys')
     .select('id, is_active')
