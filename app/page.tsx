@@ -87,6 +87,7 @@ const shockwaveRise = {
 
 const MAX_CHARS = 2000
 const WARN_CHARS = 1800
+const MIN_CHARS = 10
 const DOOR_REVEAL_DELAY = 800
 
 // ── Canvas warp engine ───────────────────────────────────────
@@ -362,6 +363,50 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
   )
 }
 
+// ── Min-length progress bar ──────────────────────────────────
+
+function MinLengthBar({ current, min }: { current: number; min: number }) {
+  const pct = Math.min(100, (current / min) * 100)
+  const done = current >= min
+
+  if (done) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="mb-3"
+    >
+      <div
+        style={{
+          height: 2,
+          background: '#111',
+          borderRadius: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${pct}%`,
+            background: pct > 60 ? '#00F5FF' : '#333',
+            borderRadius: 1,
+            transition: 'width 0.15s ease, background 0.3s ease',
+          }}
+        />
+      </div>
+      <p
+        className="font-mono text-[10px] mt-1 tracking-[0.06em]"
+        style={{ color: '#333' }}
+      >
+        {min - current} more character{min - current !== 1 ? 's' : ''} to unlock
+      </p>
+    </motion.div>
+  )
+}
+
 // ── Main component ───────────────────────────────────────────
 
 export default function HomePage() {
@@ -377,7 +422,7 @@ export default function HomePage() {
   const [objection, setObjection] = useState('')
   const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
   const [isReturning, setIsReturning] = useState(false)
-  const [isFocused, setIsFocused]     = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -444,8 +489,8 @@ export default function HomePage() {
 
   const handleSubmit = useCallback(async () => {
     const trimmed = situation.trim()
-    if (!trimmed || trimmed.length < 10) {
-      setError('Tell us more — a few more words.')
+    if (!trimmed || trimmed.length < MIN_CHARS) {
+      setError('Add a bit more context so ZYVV can challenge your decision properly.')
       return
     }
     setError('')
@@ -578,7 +623,7 @@ export default function HomePage() {
 
   const charsLeft = MAX_CHARS - situation.length
   const isNearLimit = situation.length >= WARN_CHARS
-  const canSubmit = situation.trim().length >= 10
+  const canSubmit = situation.trim().length >= MIN_CHARS
 
   return (
     <>
@@ -638,7 +683,7 @@ export default function HomePage() {
                 animate="visible"
                 exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
               >
-                {/* THREE LOCKED DOORS — first pixel the eye hits */}
+                {/* THREE LOCKED DOORS */}
                 <motion.div
                   animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
                   transition={{ duration: 0.35, ease: 'easeInOut' }}
@@ -646,9 +691,9 @@ export default function HomePage() {
                   className="mb-4"
                 >
                   {([
-                    { label: 'DOOR 1', glyph: '◈', color: '#00F5FF', dir: 'top'   as const, delay: 0,    offset: 'mr-4', animName: 'doorHeartbeat0', animDelay: '0s'   },
-                    { label: 'DOOR 2', glyph: '◉', color: '#FFB830', dir: 'left'  as const, delay: 0.15, offset: 'ml-4', animName: 'doorHeartbeat1', animDelay: '0.4s' },
-                    { label: 'DOOR 3', glyph: '⬡', color: '#BF5AF2', dir: 'right' as const, delay: 0.3,  offset: 'mr-4', animName: 'doorHeartbeat2', animDelay: '0.8s' },
+                    { label: 'DOOR 1', glyph: '◈', color: '#00F5FF', dir: 'top'   as const, delay: 0,    animName: 'doorHeartbeat0', animDelay: '0s'   },
+                    { label: 'DOOR 2', glyph: '◉', color: '#FFB830', dir: 'left'  as const, delay: 0.15, animName: 'doorHeartbeat1', animDelay: '0.4s' },
+                    { label: 'DOOR 3', glyph: '⬡', color: '#BF5AF2', dir: 'right' as const, delay: 0.3,  animName: 'doorHeartbeat2', animDelay: '0.8s' },
                   ] as const).map((d) => (
                     <motion.div
                       key={d.label}
@@ -665,7 +710,7 @@ export default function HomePage() {
                         animation: `${d.animName} 2s ease-in-out ${d.animDelay} infinite`,
                         marginRight: d.label === 'DOOR 2' ? 0 : 32,
                         marginLeft: d.label === 'DOOR 2' ? 32 : 0,
-                    }}
+                      }}
                     >
                       <span
                         className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
@@ -686,12 +731,12 @@ export default function HomePage() {
                   ))}
                 </motion.div>
 
-                {/* ZYVV — slams in after doors land */}
+                {/* ZYVV wordmark */}
                 <motion.div
                   animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
                   transition={{ duration: 0.35, ease: 'easeInOut' }}
                   style={{ overflow: 'hidden' }}
-                  className="mb-6"
+                  className="mb-2"
                 >
                   <motion.div
                     variants={slamIn}
@@ -709,19 +754,56 @@ export default function HomePage() {
                   </motion.div>
                 </motion.div>
 
+                {/* ── SUBHEADLINE — value proposition ── */}
+                <motion.div
+                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                  className="mb-6"
+                >
+                  <motion.p
+                    variants={fadeUp}
+                    initial={isReturning ? 'visible' : 'hidden'}
+                    animate="visible"
+                    custom={isReturning ? 0 : 0.55}
+                    className="font-mono text-[11px] leading-[1.7] tracking-[0.04em]"
+                    style={{ color: '#444' }}
+                  >
+                    Not a prediction. Not advice.
+                    <br />
+                    Drop your situation. Get challenged. Choose a path.
+                  </motion.p>
+                </motion.div>
+
                 {/* TEXTAREA + BUTTON */}
                 <motion.div
                   variants={shockwaveRise}
                   initial={isReturning ? 'visible' : 'hidden'}
                   animate="visible"
                 >
-                  <div className="relative mb-3">
+                  {/* ── EXPLAINER above input ── */}
+                  <div className="mb-3">
+                    <p
+                      className="font-mono text-[11px] leading-[1.6] tracking-[0.03em]"
+                      style={{ color: '#00F5FF', opacity: 0.7 }}
+                    >
+                      Type your situation. ZYVV challenges it and returns three structured paths forward.
+                    </p>
+                    <p
+                      className="font-mono text-[10px] mt-1 tracking-[0.02em]"
+                      style={{ color: '#2a2a2a' }}
+                    >
+                      e.g. "I'm considering leaving my job to go solo but I have a mortgage and I'm not sure the market timing is right."
+                    </p>
+                  </div>
+
+                  <div className="relative mb-2">
                     <textarea
                       ref={textareaRef}
                       value={situation}
                       onChange={handleTextareaChange}
                       onKeyDown={handleKeyDown}
-                      placeholder="Be honest."
+                      placeholder="Describe a decision or situation you're stuck on. The more context the better."
                       rows={4}
                       className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm"
                       style={{
@@ -735,8 +817,8 @@ export default function HomePage() {
                         transition: 'border-color 0.2s, box-shadow 0.2s',
                       }}
                       onFocus={(e) => {
-                      if (situation.length === 0) return
-                      setIsFocused(true)
+                        if (situation.length === 0) return
+                        setIsFocused(true)
                         if (!error) e.currentTarget.style.borderColor = '#00F5FF'
                         e.currentTarget.style.boxShadow = '0 0 22px rgba(0,245,255,0.13)'
                       }}
@@ -747,7 +829,7 @@ export default function HomePage() {
                       }}
                       autoFocus
                       spellCheck
-                      aria-label="Be honest."
+                      aria-label="Describe your situation"
                     />
                     {isNearLimit && (
                       <div
@@ -758,6 +840,13 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
+
+                  {/* ── MIN LENGTH PROGRESS BAR ── */}
+                  <AnimatePresence>
+                    {!canSubmit && situation.length > 0 && (
+                      <MinLengthBar current={situation.trim().length} min={MIN_CHARS} />
+                    )}
+                  </AnimatePresence>
 
                   <AnimatePresence>
                     {error && (
@@ -775,18 +864,22 @@ export default function HomePage() {
                     )}
                   </AnimatePresence>
 
+                  {/* ── PRIMARY CTA ── */}
                   <button
                     ref={submitBtnRef}
                     onClick={handleSubmit}
                     disabled={!canSubmit}
-                    className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                    className={`w-full font-mono text-[13px] font-black tracking-[0.22em] uppercase py-5 rounded-sm${canSubmit ? ' btn-launch' : ''}`}
                     style={{
-                      background: canSubmit ? 'linear-gradient(135deg, #00F5FF 0%, #0088aa 100%)' : '#0a0a0a',
+                      background: canSubmit
+                        ? 'linear-gradient(135deg, #00F5FF 0%, #0088aa 100%)'
+                        : '#0a0a0a',
                       color: canSubmit ? '#000' : '#2a2a2a',
                       border: canSubmit ? 'none' : '1px solid #1a1a1a',
                       cursor: canSubmit ? 'pointer' : 'not-allowed',
                       transition: 'all 0.25s',
                       boxShadow: canSubmit ? '0 0 30px rgba(0,245,255,0.2)' : 'none',
+                      letterSpacing: '0.22em',
                     }}
                     onMouseEnter={(e) => {
                       if (canSubmit) {
@@ -800,8 +893,21 @@ export default function HomePage() {
                     }}
                     aria-label="Open the portal"
                   >
-                    OPEN THE PORTAL
+                    {canSubmit ? 'OPEN THE PORTAL' : 'OPEN THE PORTAL'}
                   </button>
+
+                  {/* ── KEYBOARD HINT ── */}
+                  {canSubmit && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                      className="font-mono text-[9px] text-center mt-2 tracking-[0.08em]"
+                      style={{ color: '#222' }}
+                    >
+                      or press ⌘ + Enter
+                    </motion.p>
+                  )}
                 </motion.div>
               </motion.section>
             )}
@@ -854,6 +960,17 @@ export default function HomePage() {
                   THE MIRROR
                 </motion.div>
 
+                {/* ── EXPECTATION FRAMING — prevents confrontational output feeling like an error ── */}
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="font-mono text-[10px] leading-[1.6] tracking-[0.04em] mb-5"
+                  style={{ color: '#333' }}
+                >
+                  ZYVV will challenge your thinking, not validate it.
+                </motion.p>
+
                 <MirrorReveal text={mirror} onComplete={() => setPhase('doors')} />
               </motion.section>
             )}
@@ -886,6 +1003,16 @@ export default function HomePage() {
                   </p>
                 </div>
 
+                {/* ── DOORS HEADER ── */}
+                <div className="mb-4">
+                  <p
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase"
+                    style={{ color: '#333' }}
+                  >
+                    Three paths. Pick one.
+                  </p>
+                </div>
+
                 <div className="flex flex-col gap-4 mb-8">
                   {doors.map((door, i) => (
                     <Door
@@ -915,7 +1042,8 @@ export default function HomePage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                                <motion.button
+
+                <motion.button
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
@@ -1112,8 +1240,6 @@ export default function HomePage() {
             )}
 
           </AnimatePresence>
-
-
 
         </div>
       </main>

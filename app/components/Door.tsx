@@ -2,14 +2,6 @@
 // ZYVV — Door Component
 // File: app/components/Door.tsx
 // ============================================================
-// Renders a single door in two states:
-//   - closed:   door number + type label, locked glyph, muted border
-//   - revealed: full content with animated entrance
-//   - chosen:   neon glow accent, "YOUR CHOICE" badge, why_it_works visible
-//
-// All three door types use this one component via DOOR_CONFIGS.
-// Framer Motion drives the reveal and the chosen glow.
-// ============================================================
 
 'use client'
 
@@ -18,18 +10,14 @@ import { useState } from 'react'
 import { DOOR_CONFIGS } from '@/lib/types'
 import type { Door, DoorType } from '@/lib/types'
 
-// ── Props ─────────────────────────────────────────────────────
-
 interface DoorProps {
   door: Door
-  index: number           // 0 | 1 | 2 — controls stagger delay
-  isRevealed: boolean     // true after roast phase completes
-  isChosen: boolean       // true after user picks this door
-  isAnyChosen: boolean    // true after user picks *any* door
+  index: number
+  isRevealed: boolean
+  isChosen: boolean
+  isAnyChosen: boolean
   onChoose: (door: Door) => void
 }
-
-// ── Animation variants ────────────────────────────────────────
 
 const containerVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -69,8 +57,18 @@ const whyVariants = {
   },
 }
 
-// ── Glyph map ─────────────────────────────────────────────────
-// Closed door shows a unique symbol per type.
+const ctaVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: 0.35,
+      duration: 0.4,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+}
 
 const CLOSED_GLYPHS: Record<DoorType, string> = {
   conventional: '◈',
@@ -78,7 +76,11 @@ const CLOSED_GLYPHS: Record<DoorType, string> = {
   alien:        '⬡',
 }
 
-// ── Component ─────────────────────────────────────────────────
+const DOOR_LABELS: Record<DoorType, string> = {
+  conventional: 'The expected path',
+  contrarian:   'The opposite path',
+  alien:        'The reframe',
+}
 
 export default function Door({
   door,
@@ -90,99 +92,123 @@ export default function Door({
 }: DoorProps) {
   const config = DOOR_CONFIGS[door.door_type]
   const [isHovered, setIsHovered] = useState(false)
+  const [isPressed, setIsPressed] = useState(false)
 
-  // Tailwind class names derived from config
-  // We use inline style for the dynamic glow since Tailwind purges dynamic classes
+  const canChoose = isRevealed && !isAnyChosen
 
   const glowStyle = isChosen
     ? { boxShadow: `0 0 40px ${config.glowColor}40, 0 0 80px ${config.glowColor}18, inset 0 0 40px ${config.glowColor}08` }
-    : isHovered && isRevealed && !isAnyChosen
-    ? { boxShadow: `0 0 20px ${config.glowColor}28` }
+    : isPressed && canChoose
+    ? { boxShadow: `0 0 50px ${config.glowColor}60` }
+    : isHovered && canChoose
+    ? { boxShadow: `0 0 28px ${config.glowColor}35` }
     : {}
 
   const borderStyle = isChosen
     ? { borderColor: config.glowColor }
-    : isRevealed && !isAnyChosen
-    ? { borderColor: isHovered ? `${config.glowColor}80` : '#222222' }
+    : isRevealed && canChoose
+    ? { borderColor: isHovered || isPressed ? `${config.glowColor}90` : `${config.glowColor}35` }
+    : isRevealed
+    ? { borderColor: `${config.glowColor}35` }
     : { borderColor: '#1a1a1a' }
 
-  // Dimmed when another door is chosen
-  const opacity = isAnyChosen && !isChosen ? 0.35 : 1
+  const opacity = isAnyChosen && !isChosen ? 0.3 : 1
+  const scale = isPressed && canChoose ? 0.985 : 1
 
   return (
-      <motion.div
-        custom={index}
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        style={{ opacity }}
-        className="transition-opacity duration-500"
-        data-door-index={index}
-      >
+    <motion.div
+      custom={index}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      style={{ opacity, transition: 'opacity 0.5s ease' }}
+      data-door-index={index}
+    >
       <motion.div
         onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
+        onHoverEnd={() => { setIsHovered(false); setIsPressed(false) }}
+        onMouseDown={() => { if (canChoose) setIsPressed(true) }}
+        onMouseUp={() => setIsPressed(false)}
+        onTouchStart={() => { if (canChoose) setIsPressed(true) }}
+        onTouchEnd={() => {
+          setIsPressed(false)
+          if (canChoose) onChoose(door)
+        }}
         onClick={() => {
-          if (isRevealed && !isAnyChosen) onChoose(door)
+          if (canChoose) onChoose(door)
         }}
         style={{
           ...glowStyle,
           ...borderStyle,
-          transition: 'box-shadow 0.4s ease, border-color 0.3s ease',
+          transform: `scale(${scale})`,
+          transition: 'box-shadow 0.3s ease, border-color 0.25s ease, transform 0.12s ease',
         }}
         className={[
           'relative border rounded-sm',
           'bg-[#080808]',
-          'transition-all duration-300',
-          isRevealed && !isAnyChosen ? 'cursor-pointer' : 'cursor-default',
+          canChoose ? 'cursor-pointer' : 'cursor-default',
         ].join(' ')}
       >
-        {/* ── Closed state ─────────────────────────────────── */}
+
+        {/* ── CLOSED STATE ── */}
         {!isRevealed && (
-          <div className="px-6 py-6 flex items-center justify-between">
-            {/* Left: door number */}
-            <span
-              className="font-mono text-[10px] tracking-[0.14em] uppercase"
-              style={{ color: '#333' }}
-            >
-              DOOR {index + 1}
-            </span>
+          <div className="px-5 py-5 flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span
+                className="font-mono text-[9px] font-black tracking-[0.18em] uppercase"
+                style={{ color: config.glowColor, opacity: 0.5 }}
+              >
+                DOOR {index + 1}
+              </span>
+              <span
+                className="font-mono text-[9px] tracking-[0.08em]"
+                style={{ color: '#2a2a2a' }}
+              >
+                {DOOR_LABELS[door.door_type]}
+              </span>
+            </div>
 
-            {/* Center: type label */}
-            <span
-              className="font-mono text-[10px] tracking-[0.12em] uppercase"
-              style={{ color: '#2a2a2a' }}
-            >
-              {door.door_type}
-            </span>
-
-            {/* Right: locked glyph */}
-            <span style={{ color: '#2a2a2a', fontSize: 16 }}>
+            <span style={{ fontSize: 24, color: config.glowColor, opacity: 0.6 }}>
               {CLOSED_GLYPHS[door.door_type]}
+            </span>
+
+            <span
+              className="font-mono text-[9px] font-black tracking-[0.18em] uppercase"
+              style={{ color: config.glowColor, opacity: 0.3 }}
+            >
+              LOCKED
             </span>
           </div>
         )}
 
-        {/* ── Revealed state ────────────────────────────────── */}
+        {/* ── REVEALED STATE ── */}
         <AnimatePresence>
           {isRevealed && (
             <motion.div
               variants={contentVariants}
               initial="hidden"
               animate="visible"
-              className="px-6 pt-5 pb-6 overflow-hidden"
+              className="px-5 pt-5 pb-5 overflow-hidden"
             >
-              {/* Type label */}
-              <div
-                className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase mb-3"
-                style={{ color: config.glowColor }}
-              >
-                {config.label.toUpperCase()}
+              {/* Door number + type label row */}
+              <div className="flex items-center justify-between mb-3">
+                <div
+                  className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase"
+                  style={{ color: config.glowColor }}
+                >
+                  {config.label.toUpperCase()}
+                </div>
+                <span
+                  className="font-mono text-[9px] tracking-[0.12em] uppercase"
+                  style={{ color: config.glowColor, opacity: 0.4 }}
+                >
+                  DOOR {index + 1}
+                </span>
               </div>
 
               {/* Title */}
               <h3
-                className="font-serif text-[22px] font-bold leading-[1.1] tracking-tight text-white mb-3"
+                className="font-serif text-[20px] font-bold leading-[1.1] tracking-tight text-white mb-3"
                 style={{ letterSpacing: '-0.02em' }}
               >
                 {door.title}
@@ -190,22 +216,18 @@ export default function Door({
 
               {/* Description */}
               <p
-                className="text-[15px] leading-[1.65] mb-4"
+                className="text-[14px] leading-[1.65] mb-4"
                 style={{ color: '#888', fontFamily: 'Georgia, serif' }}
               >
                 {door.description}
               </p>
 
-              {/* Why it works — visible on all revealed doors */}
+              {/* Why it works */}
               <AnimatePresence>
                 {isRevealed && (
-                  <motion.div
-                    variants={whyVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
+                  <motion.div variants={whyVariants} initial="hidden" animate="visible">
                     <div
-                      className="border-l-2 pl-4 py-0.5"
+                      className="border-l-2 pl-4 py-0.5 mb-4"
                       style={{ borderColor: config.glowColor }}
                     >
                       <div
@@ -215,7 +237,7 @@ export default function Door({
                         WHY IT WORKS
                       </div>
                       <p
-                        className="font-mono text-[12px] leading-[1.65]"
+                        className="font-mono text-[11px] leading-[1.65]"
                         style={{ color: config.glowColor }}
                       >
                         {door.why_it_works}
@@ -225,18 +247,31 @@ export default function Door({
                 )}
               </AnimatePresence>
 
-              {/* Choose CTA — visible only before any choice is made */}
+              {/* ── PRIMARY TAP CTA — always visible on reveal, not hover-gated ── */}
               <AnimatePresence>
                 {!isAnyChosen && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isHovered ? 1 : 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-4 font-mono text-[10px] tracking-[0.14em] uppercase"
-                    style={{ color: config.glowColor }}
+                    variants={ctaVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
                   >
-                    ENTER THIS DOOR →
+                    <div
+                      className="w-full font-mono text-[11px] font-black tracking-[0.18em] uppercase py-3 rounded-[2px] text-center"
+                      style={{
+                        background: isPressed
+                          ? config.glowColor
+                          : isHovered
+                          ? `${config.glowColor}22`
+                          : `${config.glowColor}12`,
+                        color: isPressed ? '#000' : config.glowColor,
+                        border: `1px solid ${config.glowColor}50`,
+                        transition: 'background 0.2s ease, color 0.2s ease',
+                        userSelect: 'none',
+                      }}
+                    >
+                      ENTER THIS DOOR →
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -248,14 +283,11 @@ export default function Door({
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="mt-5"
+                    className="mt-4"
                   >
                     <span
                       className="inline-block font-mono text-[9px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-[2px]"
-                      style={{
-                        background: config.glowColor,
-                        color: '#000',
-                      }}
+                      style={{ background: config.glowColor, color: '#000' }}
                     >
                       YOUR CHOICE
                     </span>
