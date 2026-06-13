@@ -423,6 +423,8 @@ export default function HomePage() {
   const [refinement, setRefinement] = useState<RefinementBlock | null>(null)
   const [isReturning, setIsReturning] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+  const [breach, setBreach] = useState<{ assumption: string; signal: string } | null>(null)
+  const [showBreach, setShowBreach] = useState(false)
 
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -512,6 +514,7 @@ export default function HomePage() {
           body: JSON.stringify({
             situation: fullSituation,
             session_id: sessionIdRef.current,
+            version: 'mana',
           }),
         })
 
@@ -521,6 +524,8 @@ export default function HomePage() {
         setMirror(data.roast)
         setDoors(data.doors)
         setSituationId(data.situation_id)
+        setBreach(data.breach ?? null)
+        setShowBreach(false)
         setPhase('roast')
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
@@ -593,6 +598,8 @@ export default function HomePage() {
     setRevealedCount(0)
     setObjection('')
     setRefinement(null)
+    setBreach(null)
+    setShowBreach(false)
     revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
     sessionIdRef.current = generateSessionId()
@@ -971,7 +978,35 @@ export default function HomePage() {
                   ZYVV will challenge your thinking, not validate it.
                 </motion.p>
 
-                <MirrorReveal text={mirror} onComplete={() => setPhase('doors')} />
+                <MirrorReveal
+                  text={mirror}
+                  onComplete={() => {
+                    setShowBreach(true)
+                    setTimeout(() => setPhase('doors'), breach ? 2400 : 1600)
+                  }}
+                />
+
+                {breach && showBreach && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    style={{ marginTop: '2rem' }}
+                  >
+                    <p
+                      className="font-mono text-[11px] leading-[1.7] tracking-[0.03em]"
+                      style={{ color: '#333' }}
+                    >
+                      {breach.assumption}
+                    </p>
+                    <p
+                      className="font-mono text-[11px] leading-[1.7] tracking-[0.03em] mt-1"
+                      style={{ color: '#2a2a2a' }}
+                    >
+                      {breach.signal}
+                    </p>
+                  </motion.div>
+                )}
               </motion.section>
             )}
 
