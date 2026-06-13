@@ -71,6 +71,7 @@ export interface GenerateRequest {
   mode?: 'INITIALIZATION'
   situation: string
   session_id?: string
+  version?: ZyvvVersion
 }
 
 

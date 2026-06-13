@@ -168,7 +168,7 @@ ${contextRaw}
 Use this signal to sharpen the doors. The Alien Door in particular must be informed by this external reality.\n`
     : ''
 
-  const effectiveSystemPrompt = breachBlock + contextBlock + SYSTEM_PROMPT
+  const effectiveSystemPrompt = SYSTEM_PROMPT + breachBlock + contextBlock
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
