@@ -425,6 +425,8 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false)
   const [breach, setBreach] = useState<{ assumption: string; signal: string } | null>(null)
   const [showBreach, setShowBreach] = useState(false)
+  const [version, setVersion] = useState<'mana' | 'yuga'>('mana')
+  const [contextSignal, setContextSignal] = useState<{ signal: string; query: string } | null>(null)
 
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -514,7 +516,7 @@ export default function HomePage() {
           body: JSON.stringify({
             situation: fullSituation,
             session_id: sessionIdRef.current,
-            version: 'mana',
+            version,
           }),
         })
 
@@ -525,6 +527,7 @@ export default function HomePage() {
         setDoors(data.doors)
         setSituationId(data.situation_id)
         setBreach(data.breach ?? null)
+        setContextSignal(data.contextSignal ?? null)
         setShowBreach(false)
         setPhase('roast')
       } catch (err: unknown) {
@@ -600,6 +603,7 @@ export default function HomePage() {
     setRefinement(null)
     setBreach(null)
     setShowBreach(false)
+    setContextSignal(null)
     revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
     sessionIdRef.current = generateSessionId()
@@ -871,6 +875,54 @@ export default function HomePage() {
                     )}
                   </AnimatePresence>
 
+                  {/* ── VERSION SELECTOR ── */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    marginBottom: '20px',
+                    marginTop: '4px',
+                  }}>
+                    {(['mana', 'yuga'] as const).map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => setVersion(v)}
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.65rem',
+                          letterSpacing: '0.12em',
+                          textTransform: 'uppercase',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '4px 0',
+                          minWidth: '44px',
+                          minHeight: '44px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: version === v ? '#ffffff' : '#333333',
+                          borderBottom: version === v ? '1px solid #ffffff' : '1px solid transparent',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+
+                  {version === 'yuga' && (
+                    <p style={{
+                      fontSize: '0.62rem',
+                      color: '#444',
+                      fontFamily: 'monospace',
+                      marginBottom: '16px',
+                      marginTop: '-12px',
+                      letterSpacing: '0.02em',
+                    }}>
+                      grounds your situation in one verified external signal
+                    </p>
+                  )}
+
                   {/* ── PRIMARY CTA ── */}
                   <button
                     ref={submitBtnRef}
@@ -982,7 +1034,7 @@ export default function HomePage() {
                   text={mirror}
                   onComplete={() => {
                     setShowBreach(true)
-                    setTimeout(() => setPhase('doors'), breach ? 2400 : 1600)
+                    setTimeout(() => setPhase('doors'), (breach || contextSignal) ? 2400 : 1600)
                   }}
                 />
 
@@ -1004,6 +1056,26 @@ export default function HomePage() {
                       style={{ color: '#2a2a2a' }}
                     >
                       {breach.signal}
+                    </p>
+                  </motion.div>
+                )}
+
+                {contextSignal && showBreach && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                    style={{ marginTop: '2rem' }}
+                  >
+                    <p style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.72rem',
+                      color: '#777',
+                      margin: 0,
+                      letterSpacing: '0.02em',
+                      lineHeight: 1.5,
+                    }}>
+                      ─ signal: {contextSignal.signal}
                     </p>
                   </motion.div>
                 )}
