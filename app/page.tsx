@@ -742,6 +742,30 @@ export default function HomePage() {
                   ))}
                 </motion.div>
 
+                {/* ── THREE DOORS EXPLAINER — appears below locked doors, disappears on focus ── */}
+                <motion.div
+                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                  className="mb-4"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: isReturning ? 0 : 0.9 }}
+                  >
+                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
+                      ─ door 1: the best version of the obvious path, built against verified reality
+                    </p>
+                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
+                      ─ door 2: the path that goes directly through the friction you&apos;ve been avoiding
+                    </p>
+                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
+                      ─ door 3: built on the premise that the problem itself is the wrong problem
+                    </p>
+                  </motion.div>
+                </motion.div>
+
                 {/* ZYVV wordmark */}
                 <motion.div
                   animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
@@ -756,8 +780,9 @@ export default function HomePage() {
                     custom={isReturning ? 0 : 0.4}
                     className="font-mono font-black tracking-[-0.04em] text-white"
                     style={{
-                      fontSize: 'clamp(64px, 20vw, 108px)',
-                      lineHeight: 0.88,
+                      fontSize: 'clamp(72px, 22vw, 120px)',
+                      lineHeight: 0.85,
+                      letterSpacing: '-0.05em',
                       textShadow: '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
                     }}
                   >
@@ -780,9 +805,13 @@ export default function HomePage() {
                     className="font-mono text-[11px] leading-[1.7] tracking-[0.04em]"
                     style={{ color: '#444' }}
                   >
-                    Not a prediction. Not advice.
+                    Not advice. Not prediction. A decision protocol.
                     <br />
-                    Drop your situation. Get challenged. Choose a path.
+                    ZYVV detects the assumption you didn&apos;t know you were making,
+                    <br />
+                    searches for evidence it&apos;s wrong,
+                    <br />
+                    and returns three structurally different paths built against verified reality.
                   </motion.p>
                 </motion.div>
 
@@ -796,9 +825,9 @@ export default function HomePage() {
                   <div className="mb-3">
                     <p
                       className="font-mono text-[11px] leading-[1.6] tracking-[0.03em]"
-                      style={{ color: '#00F5FF', opacity: 0.7 }}
+                      style={{ color: '#00F5FF', opacity: 0.6 }}
                     >
-                      Type your situation. ZYVV challenges it and returns three structured paths forward.
+                      Be specific. Vague input gets a vague breach.
                     </p>
                     <p
                       className="font-mono text-[10px] mt-1 tracking-[0.02em]"
@@ -876,12 +905,7 @@ export default function HomePage() {
                   </AnimatePresence>
 
                   {/* ── VERSION SELECTOR ── */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '16px',
-                    marginBottom: '20px',
-                    marginTop: '4px',
-                  }}>
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '12px', marginTop: '4px' }}>
                     {(['mana', 'yuga'] as const).map((v) => (
                       <button
                         key={v}
@@ -910,18 +934,39 @@ export default function HomePage() {
                     ))}
                   </div>
 
-                  {version === 'yuga' && (
-                    <p style={{
-                      fontSize: '0.62rem',
-                      color: '#444',
-                      fontFamily: 'monospace',
-                      marginBottom: '16px',
-                      marginTop: '-12px',
-                      letterSpacing: '0.02em',
-                    }}>
-                      grounds your situation in one verified external signal
-                    </p>
-                  )}
+                  {/* Engine description — always visible, switches on selection */}
+                  <div style={{ marginBottom: '20px', marginTop: '-4px', minHeight: '42px' }}>
+                    {version === 'mana' && (
+                      <motion.div
+                        key="mana-desc"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <p style={{ fontSize: '0.62rem', color: '#555', fontFamily: 'monospace', letterSpacing: '0.02em', lineHeight: 1.7, margin: 0 }}>
+                          ─ fetches one verified real-world signal before generating your doors
+                        </p>
+                        <p style={{ fontSize: '0.60rem', color: '#333', fontFamily: 'monospace', letterSpacing: '0.02em', lineHeight: 1.7, margin: 0 }}>
+                          ─ faster · signal injected silently · doors built against external reality
+                        </p>
+                      </motion.div>
+                    )}
+                    {version === 'yuga' && (
+                      <motion.div
+                        key="yuga-desc"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <p style={{ fontSize: '0.62rem', color: '#555', fontFamily: 'monospace', letterSpacing: '0.02em', lineHeight: 1.7, margin: 0 }}>
+                          ─ detects the assumption you didn&apos;t state
+                        </p>
+                        <p style={{ fontSize: '0.60rem', color: '#333', fontFamily: 'monospace', letterSpacing: '0.02em', lineHeight: 1.7, margin: 0 }}>
+                          ─ searches for evidence it&apos;s wrong · builds all three doors against the breach · +3s
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
 
                   {/* ── PRIMARY CTA ── */}
                   <button
@@ -967,6 +1012,32 @@ export default function HomePage() {
                       or press ⌘ + Enter
                     </motion.p>
                   )}
+
+                  {/* ── API HINT — visible only when not focused, for dev/founder audience ── */}
+                  <AnimatePresence>
+                    {!isFocused && phase === 'input' && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, delay: 1.2 }}
+                        style={{ marginTop: '32px', textAlign: 'center' }}
+                      >
+                        <p
+                          className="font-mono text-[9px] tracking-[0.06em]"
+                          style={{ color: '#2a2a2a', marginBottom: '4px' }}
+                        >
+                          building something?
+                        </p>
+                        <p
+                          className="font-mono text-[9px] tracking-[0.06em]"
+                          style={{ color: '#333', borderBottom: '1px solid #222', display: 'inline', paddingBottom: '1px' }}
+                        >
+                          POST /api/v1/doors · /v1/choice · /v1/interrogate
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               </motion.section>
             )}
