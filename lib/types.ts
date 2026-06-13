@@ -73,12 +73,7 @@ export interface GenerateRequest {
   session_id?: string
 }
 
-export interface GenerateResponse {
-  roast: string
-  doors: Door[]
-  situation_id: number
-  structuredData?: StructuredData   // ← New for moat
-}
+
 
 // ── API Payloads — MODE B ────────────────────────────────────
 
@@ -172,4 +167,18 @@ export const DOOR_CONFIGS: Record<DoorType, DoorConfig> = {
     shadowColor: 'shadow-purple',
     glowColor: '#BF5AF2',
   },
+}
+// ── MANA: Assumption Breach ───────────────────────────────────
+export interface AssumptionBreachDisplay {
+  assumption: string
+  signal: string
+}
+
+// Replace the existing GenerateResponse interface with this:
+export interface GenerateResponse {
+  roast: string
+  doors: Door[]
+  situation_id: number
+  structuredData?: StructuredData
+  breach: AssumptionBreachDisplay | null
 }

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateDoors, interrogateDoor } from '@/lib/groq'
 import { saveSituation, saveDoors } from '@/lib/supabase'
+import { extractAssumptionBreach } from '@/lib/assumptionEngine'
 import type {
   GenerateRequest,
   GenerateResponse,
@@ -55,13 +56,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Situation too long. Keep it under 2000 characters.' }, { status: 400 })
     }
 
-    const groqResult = await generateDoors(trimmed)
+    // MANA: Three-pass assumption breach — non-blocking, always fails silently
+    const breach = await extractAssumptionBreach(trimmed)
+    const groqResult = await generateDoors(trimmed, breach
+      ? { assumption: breach.assumption, raw: breach.raw }
+      : null
+    )
     const { roast, doors, structuredData } = groqResult
 
     const situation_id = await saveSituation({
       content: trimmed,
       session_id: session_id ?? null,
       email: undefined,
+      assumption_detected: breach?.assumption ?? null,
+      context_signal: breach?.signal ?? null,
+      context_query: breach?.searchQuery ?? null,
     })
 
     const doorsWithMoat = doors.map((door, index) => ({
@@ -77,6 +86,9 @@ export async function POST(req: NextRequest) {
       doors: savedDoors,
       situation_id,
       structuredData,
+      breach: breach
+        ? { assumption: breach.assumption, signal: breach.signal }
+        : null,
     }
 
     return NextResponse.json(response, { status: 200 })

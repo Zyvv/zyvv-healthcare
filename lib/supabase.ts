@@ -26,7 +26,11 @@ export const supabaseAdmin = createClient(
 )
 
 export async function saveSituation(
-  situation: Omit<Situation, 'id'>
+  situation: Omit<Situation, 'id'> & {
+    assumption_detected?: string | null
+    context_signal?: string | null
+    context_query?: string | null
+  }
 ): Promise<number> {
   const { data, error } = await supabaseAdmin
     .from('situations')

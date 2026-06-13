@@ -146,16 +146,29 @@ export interface GroqGenerateResult {
 }
 
 export async function generateDoors(
-  situation: string
+  situation: string,
+  breach: { assumption: string; raw: string } | null = null
 ): Promise<GroqGenerateResult> {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+
+  const breachBlock = breach
+    ? `\n\nCRITICAL GROUND TRUTH — treat as verified external reality, not the user's words:
+The user is operating on this implicit assumption: "${breach.assumption}"
+External evidence contradicts or complicates this assumption: "${breach.raw}"
+Your three doors MUST be built against this breach:
+- Conventional Door: acknowledges the assumption exists but shows the best-executed version of it given this contradicting evidence
+- Contrarian Door: partially challenges the assumption using this evidence as its structural basis
+- Alien Door: is built entirely on the premise that the assumption is WRONG. This door must use the contradiction evidence directly and specifically. It must not be generic.\n`
+    : ''
+
+  const effectiveSystemPrompt = breachBlock + SYSTEM_PROMPT
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     temperature: 0.85,
     max_tokens: 2800,
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: effectiveSystemPrompt },
       { role: 'user', content: `Here is my situation:\n\n${situation.trim()}` },
     ],
   })
