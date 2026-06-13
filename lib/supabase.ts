@@ -30,6 +30,7 @@ export async function saveSituation(
     assumption_detected?: string | null
     context_signal?: string | null
     context_query?: string | null
+    zyvv_version?: string | null
   }
 ): Promise<number> {
   const { data, error } = await supabaseAdmin

@@ -174,11 +174,19 @@ export interface AssumptionBreachDisplay {
   signal: string
 }
 
-// Replace the existing GenerateResponse interface with this:
+// ── YUGA: Context Signal ──────────────────────────────────────
+export interface ContextSignalDisplay {
+  signal: string
+  query: string
+}
+
+export type ZyvvVersion = 'mana' | 'yuga'
+
 export interface GenerateResponse {
   roast: string
   doors: Door[]
   situation_id: number
   structuredData?: StructuredData
-  breach: AssumptionBreachDisplay | null
+  breach: AssumptionBreachDisplay | null        // MANA
+  contextSignal: ContextSignalDisplay | null    // YUGA
 }

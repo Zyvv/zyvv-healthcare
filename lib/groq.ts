@@ -147,7 +147,8 @@ export interface GroqGenerateResult {
 
 export async function generateDoors(
   situation: string,
-  breach: { assumption: string; raw: string } | null = null
+  breach: { assumption: string; raw: string } | null = null,
+  contextRaw: string | null = null
 ): Promise<GroqGenerateResult> {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
@@ -161,7 +162,13 @@ Your three doors MUST be built against this breach:
 - Alien Door: is built entirely on the premise that the assumption is WRONG. This door must use the contradiction evidence directly and specifically. It must not be generic.\n`
     : ''
 
-  const effectiveSystemPrompt = breachBlock + SYSTEM_PROMPT
+  const contextBlock = contextRaw
+    ? `\n\nEXTERNAL CONTEXT — verified real-world signal, inject into your analysis:
+${contextRaw}
+Use this signal to sharpen the doors. The Alien Door in particular must be informed by this external reality.\n`
+    : ''
+
+  const effectiveSystemPrompt = breachBlock + contextBlock + SYSTEM_PROMPT
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',

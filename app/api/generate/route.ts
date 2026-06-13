@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateDoors, interrogateDoor } from '@/lib/groq'
 import { saveSituation, saveDoors } from '@/lib/supabase'
 import { extractAssumptionBreach } from '@/lib/assumptionEngine'
+import { enrichContext } from '@/lib/contextEnrich'
 import type {
   GenerateRequest,
   GenerateResponse,
@@ -56,11 +57,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Situation too long. Keep it under 2000 characters.' }, { status: 400 })
     }
 
-    // MANA: Three-pass assumption breach — non-blocking, always fails silently
-    const breach = await extractAssumptionBreach(trimmed)
-    const groqResult = await generateDoors(trimmed, breach
-      ? { assumption: breach.assumption, raw: breach.raw }
-      : null
+    // Version branching — MANA: assumption breach, YUGA: context enrichment
+    const version = (body.version === 'yuga') ? 'yuga' : 'mana'
+
+    let breach = null
+    let contextSignal = null
+
+    if (version === 'mana') {
+      breach = await extractAssumptionBreach(trimmed)
+    } else {
+      contextSignal = await enrichContext(trimmed)
+    }
+
+    const groqResult = await generateDoors(
+      trimmed,
+      breach ? { assumption: breach.assumption, raw: breach.raw } : null,
+      contextSignal?.raw ?? null
     )
     const { roast, doors, structuredData } = groqResult
 
@@ -69,8 +81,9 @@ export async function POST(req: NextRequest) {
       session_id: session_id ?? null,
       email: undefined,
       assumption_detected: breach?.assumption ?? null,
-      context_signal: breach?.signal ?? null,
-      context_query: breach?.searchQuery ?? null,
+      context_signal: breach?.signal ?? contextSignal?.signal ?? null,
+      context_query: breach?.searchQuery ?? contextSignal?.query ?? null,
+      zyvv_version: version,
     })
 
     const doorsWithMoat = doors.map((door, index) => ({
@@ -81,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     const savedDoors = await saveDoors(doorsWithMoat)
 
-    const response: GenerateResponse = {
+    return NextResponse.json({
       roast,
       doors: savedDoors,
       situation_id,
@@ -89,9 +102,10 @@ export async function POST(req: NextRequest) {
       breach: breach
         ? { assumption: breach.assumption, signal: breach.signal }
         : null,
-    }
-
-    return NextResponse.json(response, { status: 200 })
+      contextSignal: contextSignal
+        ? { signal: contextSignal.signal, query: contextSignal.query }
+        : null,
+    }, { status: 200 })
   } catch (err: any) {
     console.error('[/api/generate] Error:', err)
     return NextResponse.json(
