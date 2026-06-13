@@ -424,7 +424,7 @@ export default function HomePage() {
   const [isReturning, setIsReturning] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [breach, setBreach] = useState<{ assumption: string; signal: string } | null>(null)
-  const [showBreach, setShowBreach] = useState(false)
+  const [showPostMirror, setShowPostMirror] = useState(false)
   const [version, setVersion] = useState<'mana' | 'yuga'>('mana')
   const [contextSignal, setContextSignal] = useState<{ signal: string; query: string } | null>(null)
 
@@ -528,7 +528,7 @@ export default function HomePage() {
         setSituationId(data.situation_id)
         setBreach(data.breach ?? null)
         setContextSignal(data.contextSignal ?? null)
-        setShowBreach(false)
+        setShowPostMirror(false)
         setPhase('roast')
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
@@ -536,7 +536,7 @@ export default function HomePage() {
         warpPhaseRef.current = 'idle'
       }
     })
-  }, [situation, tried])
+  }, [situation, tried, version])
 
   // ── Door chosen → interrogation ──────────────────────────────
 
@@ -602,7 +602,7 @@ export default function HomePage() {
     setObjection('')
     setRefinement(null)
     setBreach(null)
-    setShowBreach(false)
+    setShowPostMirror(false)
     setContextSignal(null)
     revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
@@ -1033,12 +1033,12 @@ export default function HomePage() {
                 <MirrorReveal
                   text={mirror}
                   onComplete={() => {
-                    setShowBreach(true)
+                    setShowPostMirror(true)
                     setTimeout(() => setPhase('doors'), (breach || contextSignal) ? 2400 : 1600)
                   }}
                 />
 
-                {breach && showBreach && (
+                {breach && showPostMirror && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1060,7 +1060,7 @@ export default function HomePage() {
                   </motion.div>
                 )}
 
-                {contextSignal && showBreach && (
+                {contextSignal && showPostMirror && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

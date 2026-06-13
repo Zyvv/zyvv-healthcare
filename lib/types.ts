@@ -172,6 +172,7 @@ export const DOOR_CONFIGS: Record<DoorType, DoorConfig> = {
 export interface AssumptionBreachDisplay {
   assumption: string
   signal: string
+  searchQuery?: string
 }
 
 // ── YUGA: Context Signal ──────────────────────────────────────
