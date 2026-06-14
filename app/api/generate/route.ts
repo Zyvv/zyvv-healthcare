@@ -63,11 +63,11 @@ export async function POST(req: NextRequest) {
     let breach = null
     let contextSignal = null
 
-    if (version === 'mana') {
-      breach = await extractAssumptionBreach(trimmed)
-    } else {
-      contextSignal = await enrichContext(trimmed)
-    }
+    if (version === 'yuga') {
+  breach = await extractAssumptionBreach(trimmed)
+} else {
+  contextSignal = await enrichContext(trimmed)
+}
 
     const groqResult = await generateDoors(
       trimmed,
