@@ -987,12 +987,13 @@ export default function HomePage() {
           alignItems: 'center',
           background: 'var(--color-panel-raised)',
         }}>
-          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: 'var(--color-text-dim)' }}>
+          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: '#555' }}>
             API ACCESS · EARLY PARTNER PROGRAM
           </span>
           <a
             href="mailto:zyvv.contact@gmail.com?subject=ZYVV%20API%20Access%20Request&body=Name%3A%0ACompany%3A%0AUse%20case%3A%0AEngine%20needed%20(MANA%2FYUGA%2FBoth)%3A"
-            className="font-mono text-[8px] font-bold tracking-[0.1em] text-[#00F5FF] hover:opacity-70 transition-opacity"
+            className="font-mono text-[8px] font-bold tracking-[0.1em] hover:opacity-70 transition-opacity"
+            style={{ color: '#666', textDecoration: 'none' }}
             style={{ textDecoration: 'none' }}
           >
             API REQUEST ACCESS →
