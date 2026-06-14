@@ -940,7 +940,7 @@ export default function HomePage() {
                 {version === 'mana' ? '● ACTIVE' : '○ STANDBY'}
               </span>
             </div>
-            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: '#888', marginBottom: 8 }}>
               Verified external signal injected as ground truth before door generation.
             </p>
             <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, color: 'var(--color-text-dim)', letterSpacing: '0.1em' }}>
@@ -972,7 +972,7 @@ export default function HomePage() {
                 {version === 'yuga' ? '● ACTIVE' : '○ STANDBY'}
               </span>
             </div>
-            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: '#888', marginBottom: 8 }}>
               Extracts unstated assumption. Searches for counter-evidence. Rebuilds all doors against the breach.
             </p>
             <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, color: 'var(--color-text-dim)', letterSpacing: '0.1em' }}>
@@ -990,9 +990,13 @@ export default function HomePage() {
           <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: 'var(--color-text-dim)' }}>
             API ACCESS · EARLY PARTNER PROGRAM
           </span>
-          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: '#00F5FF', fontWeight: 900 }}>
+          <a
+            href="mailto:zyvv.contact@gmail.com?subject=ZYVV%20API%20Access%20Request&body=Name%3A%0ACompany%3A%0AUse%20case%3A%0AEngine%20needed%20(MANA%2FYUGA%2FBoth)%3A"
+            className="font-mono text-[8px] font-bold tracking-[0.1em] text-[#00F5FF] hover:opacity-70 transition-opacity"
+            style={{ textDecoration: 'none' }}
+          >
             REQUEST ACCESS →
-          </span>
+          </a>
         </div>
       </div>
 
