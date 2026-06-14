@@ -653,6 +653,11 @@ export default function HomePage() {
         }
       `}</style>
       <canvas ref={canvasRef} id="galaxy-canvas" aria-hidden="true" />
+      <div aria-hidden="true" style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+        backgroundSize: '44px 44px',
+      }} />
 
       <main
         className="min-h-dvh min-h-screen flex flex-col items-center px-5 py-12"
@@ -694,6 +699,27 @@ export default function HomePage() {
                 animate="visible"
                 exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
               >
+                {/* SYS-BAR */}
+                <motion.div
+                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                  className="mb-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-[6px] w-[6px]">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: '#00F5FF' }} />
+                        <span className="relative inline-flex rounded-full h-[6px] w-[6px]" style={{ background: '#00F5FF' }} />
+                      </span>
+                      <span className="font-mono text-[9px] font-bold tracking-[0.18em]" style={{ color: '#333' }}>
+                        DECISION PROTOCOL · ONLINE
+                      </span>
+                    </div>
+                    <span className="font-mono text-[8px] tracking-[0.1em]" style={{ color: '#222' }}>v2.0.1</span>
+                  </div>
+                </motion.div>
+
                 {/* THREE LOCKED DOORS */}
                 <motion.div
                   animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
@@ -729,8 +755,15 @@ export default function HomePage() {
                       >
                         {d.label}
                       </span>
-                      <span style={{ fontSize: 28, color: d.color, opacity: 0.8 }}>
-                        {d.glyph}
+                      <span
+                        className="font-mono text-[8px] text-center leading-[1.5] tracking-[0.03em]"
+                        style={{ color: d.color, opacity: 0.3, maxWidth: 160 }}
+                      >
+                        {d.label === 'DOOR 1'
+                          ? 'The sharpest version of the obvious path'
+                          : d.label === 'DOOR 2'
+                          ? 'Through the friction you\'ve been avoiding'
+                          : 'Built on the premise you\'re asking the wrong question'}
                       </span>
                       <span
                         className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
@@ -742,29 +775,7 @@ export default function HomePage() {
                   ))}
                 </motion.div>
 
-                {/* ── THREE DOORS EXPLAINER — appears below locked doors, disappears on focus ── */}
-                <motion.div
-                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                  className="mb-4"
-                >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: isReturning ? 0 : 0.9 }}
-                  >
-                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
-                      ─ door 1: the best version of the obvious path, built against verified reality
-                    </p>
-                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
-                      ─ door 2: the path that goes directly through the friction you&apos;ve been avoiding
-                    </p>
-                    <p className="font-mono text-[9px] leading-[1.8] tracking-[0.04em]" style={{ color: '#2a2a2a' }}>
-                      ─ door 3: built on the premise that the problem itself is the wrong problem
-                    </p>
-                  </motion.div>
-                </motion.div>
+
 
                 {/* ZYVV wordmark */}
                 <motion.div
@@ -833,7 +844,13 @@ export default function HomePage() {
                       className="font-mono text-[10px] mt-1 tracking-[0.02em]"
                       style={{ color: '#2a2a2a' }}
                     >
-                      e.g. "I'm considering leaving my job to go solo but I have a mortgage and I'm not sure the market timing is right."
+                      e.g. "I&apos;m considering leaving my job to go solo but I have a mortgage and I&apos;m not sure the market timing is right."
+                    </p>
+                    <p
+                      className="font-mono text-[9px] mt-2 tracking-[0.06em]"
+                      style={{ color: '#2e2e2e' }}
+                    >
+                      ↓ type your situation — the three doors unlock on submission
                     </p>
                   </div>
 
@@ -911,11 +928,11 @@ export default function HomePage() {
                       <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#00F5FF] animate-pulse" />
                         <span className="font-mono text-[9px] font-black tracking-[0.15em] text-[#666]">
-                          CORE PROTOCOL DEPLOYMENT MATRIX
+                          INTELLIGENCE ENGINE
                         </span>
                       </div>
                       <span className="font-mono text-[8px] text-[#333] tracking-[0.05em]">
-                        v2.0.1 // LIVE
+                        SELECT BEFORE LAUNCH
                       </span>
                     </div>
                     {/* Dual engine tracks */}
@@ -940,10 +957,16 @@ export default function HomePage() {
                             {version === 'mana' ? '● ENGAGED' : '◈ STANDBY'}
                           </span>
                         </div>
-                        <p className="font-mono text-[9px] leading-relaxed mb-3"
+                        <p className="font-mono text-[9px] leading-relaxed mb-2"
                           style={{ color: version === 'mana' ? '#555' : '#333' }}>
-                          Extracts implicit assumptions. Injects a verified real-world signal silently into door generation.
+                          Fetches one verified external signal. Injects it as ground truth before generating your three doors.
                         </p>
+                        <div className="flex gap-1 mb-3 flex-wrap">
+                          <span className="font-mono text-[7px] font-black tracking-[0.1em] px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(0,245,255,0.07)', color: '#00F5FF' }}>PASS 1 — QUERY</span>
+                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(0,245,255,0.04)', color: 'rgba(0,245,255,0.5)' }}>PASS 2 — SIGNAL</span>
+                        </div>
                         <span className="font-mono text-[8px] tracking-[0.05em] text-[#2a2a2a] mt-auto">
                           POST /api/v1/mana/doors
                         </span>
@@ -967,10 +990,18 @@ export default function HomePage() {
                             {version === 'yuga' ? '● ENGAGED' : '◈ STANDBY'}
                           </span>
                         </div>
-                        <p className="font-mono text-[9px] leading-relaxed mb-3"
+                        <p className="font-mono text-[9px] leading-relaxed mb-2"
                           style={{ color: version === 'yuga' ? '#555' : '#333' }}>
-                          Detects the assumption you didn&apos;t state. Searches for opposing evidence. Rebuilds all three doors against the breach.
+                          Finds the assumption you didn&apos;t state. Searches for evidence it&apos;s wrong. Rebuilds all three doors against the breach.
                         </p>
+                        <div className="flex gap-1 mb-3 flex-wrap">
+                          <span className="font-mono text-[7px] font-black tracking-[0.1em] px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(191,90,242,0.07)', color: '#BF5AF2' }}>PASS 1 — EXTRACT</span>
+                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(191,90,242,0.04)', color: 'rgba(191,90,242,0.5)' }}>PASS 2 — BREACH</span>
+                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(191,90,242,0.04)', color: 'rgba(191,90,242,0.5)' }}>PASS 3 — COMPRESS</span>
+                        </div>
                         <span className="font-mono text-[8px] tracking-[0.05em] text-[#2a2a2a] mt-auto">
                           POST /api/v1/yuga/doors
                         </span>
