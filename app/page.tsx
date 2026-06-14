@@ -728,9 +728,9 @@ export default function HomePage() {
                   className="mb-4"
                 >
                   {([
-                    { label: 'DOOR 1', glyph: '◈', color: '#00F5FF', dir: 'top'   as const, delay: 0,    animName: 'doorHeartbeat0', animDelay: '0s'   },
-                    { label: 'DOOR 2', glyph: '◉', color: '#FFB830', dir: 'left'  as const, delay: 0.15, animName: 'doorHeartbeat1', animDelay: '0.4s' },
-                    { label: 'DOOR 3', glyph: '⬡', color: '#BF5AF2', dir: 'right' as const, delay: 0.3,  animName: 'doorHeartbeat2', animDelay: '0.8s' },
+                    { label: 'DOOR 01', glyph: '◈', color: '#00F5FF', dir: 'top'   as const, delay: 0,    animName: 'doorHeartbeat0', animDelay: '0s'   },
+                    { label: 'DOOR 02', glyph: '◉', color: '#FFB830', dir: 'left'  as const, delay: 0.15, animName: 'doorHeartbeat1', animDelay: '0.4s' },
+                    { label: 'DOOR 03', glyph: '⬡', color: '#BF5AF2', dir: 'right' as const, delay: 0.3,  animName: 'doorHeartbeat2', animDelay: '0.8s' },
                   ] as const).map((d) => (
                     <motion.div
                       key={d.label}
@@ -745,8 +745,8 @@ export default function HomePage() {
                         background: 'rgba(8,8,8,0.85)',
                         border: `1px solid ${d.color}4D`,
                         animation: `${d.animName} 2s ease-in-out ${d.animDelay} infinite`,
-                        marginRight: d.label === 'DOOR 2' ? 0 : 32,
-                        marginLeft: d.label === 'DOOR 2' ? 32 : 0,
+                        marginRight: d.label === 'DOOR 02' ? 0 : 20,
+                        marginLeft:  d.label === 'DOOR 02' ? 20 : 0,
                       }}
                     >
                       <span
@@ -759,11 +759,11 @@ export default function HomePage() {
                         className="font-mono text-[8px] text-center leading-[1.5] tracking-[0.03em]"
                         style={{ color: d.color, opacity: 0.3, maxWidth: 160 }}
                       >
-                        {d.label === 'DOOR 1'
-                          ? 'The sharpest version of the obvious path'
-                          : d.label === 'DOOR 2'
-                          ? 'Through the friction you\'ve been avoiding'
-                          : 'Built on the premise you\'re asking the wrong question'}
+                        {d.label === 'DOOR 01'
+  ? 'The sharpest version of the obvious path'
+  : d.label === 'DOOR 02'
+  ? 'Through the friction you\'ve been avoiding'
+  : 'Built on the premise you\'re asking the wrong question'}
                       </span>
                       <span
                         className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
