@@ -759,7 +759,7 @@ export default function HomePage() {
             <div style={{ fontFamily: 'var(--font-hud)', fontSize: 8, letterSpacing: '0.2em', color: `${d.color}66`, marginBottom: 3 }}>
               {d.label} · {d.sublabel}
             </div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: 9, color: 'var(--color-text-dim)', letterSpacing: '0.06em' }}>
+            <div style={{ fontFamily: 'var(--font-hud)', fontSize: 9, color: '#666', letterSpacing: '0.06em' }}>
               {d.label === 'DOOR 01' ? 'Sharpest version of the obvious path'
                : d.label === 'DOOR 02' ? 'Through the friction you have been avoiding'
                : 'Built on the premise you are asking the wrong question'}
@@ -814,12 +814,12 @@ export default function HomePage() {
         fontFamily: 'var(--font-hud)',
         fontSize: 10,
         lineHeight: 1.7,
-        color: 'var(--color-text-secondary)',
+        color: '#777',
         letterSpacing: '0.04em',
       }}>
         NOT ADVICE. NOT PREDICTION.<br />
         A DECISION PROTOCOL.<br />
-        <span style={{ color: 'var(--color-text-dim)' }}>
+        <span style={{ color: '#555' }}>
           THREE DIVERGENT PATHS. ZERO CONSENSUS THINKING.
         </span>
       </p>
@@ -995,7 +995,7 @@ export default function HomePage() {
             className="font-mono text-[8px] font-bold tracking-[0.1em] text-[#00F5FF] hover:opacity-70 transition-opacity"
             style={{ textDecoration: 'none' }}
           >
-            REQUEST ACCESS →
+            API REQUEST ACCESS →
           </a>
         </div>
       </div>
