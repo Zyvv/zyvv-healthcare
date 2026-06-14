@@ -1144,15 +1144,15 @@ export default function HomePage() {
                   >
                     <p
                       className="font-mono text-[11px] leading-[1.7] tracking-[0.03em]"
-                      style={{ color: '#333' }}
+                      style={{ color: '#555' }}
                     >
-                      {breach.assumption}
+                      ─ assumption: {breach.assumption}
                     </p>
                     <p
                       className="font-mono text-[11px] leading-[1.7] tracking-[0.03em] mt-1"
-                      style={{ color: '#2a2a2a' }}
+                      style={{ color: '#444' }}
                     >
-                      {breach.signal}
+                      ─ signal: {breach.signal}
                     </p>
                   </motion.div>
                 )}
