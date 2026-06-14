@@ -693,409 +693,396 @@ export default function HomePage() {
 
             {/* INPUT */}
             {phase === 'input' && (
-              <motion.section
-                key="input-phase"
-                initial="hidden"
-                animate="visible"
-                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.25 } }}
-              >
-                {/* SYS-BAR */}
-                <motion.div
-                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                  className="mb-6"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-[6px] w-[6px]">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: '#00F5FF' }} />
-                        <span className="relative inline-flex rounded-full h-[6px] w-[6px]" style={{ background: '#00F5FF' }} />
-                      </span>
-                      <span className="font-mono text-[9px] font-bold tracking-[0.18em]" style={{ color: '#333' }}>
-                        DECISION PROTOCOL · ONLINE
-                      </span>
-                    </div>
-                    <span className="font-mono text-[8px] tracking-[0.1em]" style={{ color: '#222' }}>v2.0.1</span>
-                  </div>
-                </motion.div>
+  <motion.section
+    key="input-phase"
+    initial="hidden"
+    animate="visible"
+    exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.2 } }}
+  >
+    {/* ── TOP SYS-BAR — MGS PTT style ── */}
+    <motion.div
+      animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+      transition={{ duration: 0.25 }}
+      style={{ overflow: 'hidden', marginBottom: 16 }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '6px 10px',
+        background: 'var(--color-panel-raised)',
+        border: '1px solid var(--color-border-dim)',
+        borderRadius: 2,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="readout-blink" style={{ fontSize: 7, fontFamily: 'var(--font-hud)', letterSpacing: '0.2em' }}>●</span>
+          <span className="hud-label">PTT · DECISION PROTOCOL ONLINE</span>
+        </div>
+        <span className="hud-label" style={{ color: 'var(--color-text-dim)' }}>SYS v2.0.1</span>
+      </div>
+    </motion.div>
 
-                {/* THREE LOCKED DOORS */}
-                <motion.div
-                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
-                  transition={{ duration: 0.35, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                  className="mb-4"
-                >
-                  {([
-                    { label: 'DOOR 01', glyph: '◈', color: '#00F5FF', dir: 'top'   as const, delay: 0,    animName: 'doorHeartbeat0', animDelay: '0s'   },
-                    { label: 'DOOR 02', glyph: '◉', color: '#FFB830', dir: 'left'  as const, delay: 0.15, animName: 'doorHeartbeat1', animDelay: '0.4s' },
-                    { label: 'DOOR 03', glyph: '⬡', color: '#BF5AF2', dir: 'right' as const, delay: 0.3,  animName: 'doorHeartbeat2', animDelay: '0.8s' },
-                  ] as const).map((d) => (
-                    <motion.div
-                      key={d.label}
-                      variants={doorSlam}
-                      custom={d.dir}
-                      initial={isReturning ? 'visible' : 'hidden'}
-                      animate="visible"
-                      transition={{ delay: isReturning ? 0 : d.delay }}
-                      className="flex items-center justify-between px-4 mb-2 rounded-sm"
-                      style={{
-                        height: 80,
-                        background: 'rgba(8,8,8,0.85)',
-                        border: `1px solid ${d.color}4D`,
-                        animation: `${d.animName} 2s ease-in-out ${d.animDelay} infinite`,
-                        marginRight: d.label === 'DOOR 02' ? 0 : 20,
-                        marginLeft:  d.label === 'DOOR 02' ? 20 : 0,
-                      }}
-                    >
-                      <span
-                        className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
-                        style={{ color: d.color, opacity: 0.5 }}
-                      >
-                        {d.label}
-                      </span>
-                      <span
-                        className="font-mono text-[8px] text-center leading-[1.5] tracking-[0.03em]"
-                        style={{ color: d.color, opacity: 0.3, maxWidth: 160 }}
-                      >
-                        {d.label === 'DOOR 01'
-  ? 'The sharpest version of the obvious path'
-  : d.label === 'DOOR 02'
-  ? 'Through the friction you\'ve been avoiding'
-  : 'Built on the premise you\'re asking the wrong question'}
-                      </span>
-                      <span
-                        className="font-mono text-[10px] font-black tracking-[0.18em] uppercase"
-                        style={{ color: d.color, opacity: 0.4 }}
-                      >
-                        LOCKED
-                      </span>
-                    </motion.div>
-                  ))}
-                </motion.div>
+    {/* ── THREE LOCKED DOORS — codec panel style ── */}
+    <motion.div
+      animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+      transition={{ duration: 0.3 }}
+      style={{ overflow: 'hidden', marginBottom: 14 }}
+    >
+      {([
+        { label: 'DOOR 01', sublabel: 'CONVENTIONAL', color: '#00F5FF', delay: 0 },
+        { label: 'DOOR 02', sublabel: 'CONTRARIAN',   color: '#FFB830', delay: 0.1 },
+        { label: 'DOOR 03', sublabel: 'ALIEN',        color: '#BF5AF2', delay: 0.2 },
+      ] as const).map((d) => (
+        <motion.div
+          key={d.label}
+          initial={isReturning ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: d.delay, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 14px',
+            marginBottom: 4,
+            background: 'var(--color-panel)',
+            border: `1px solid ${d.color}1a`,
+            borderLeft: `2px solid ${d.color}55`,
+            borderRadius: 2,
+          }}
+        >
+          {/* Corner brackets */}
+          <span className="hud-corner hud-corner--tl" style={{ borderColor: `${d.color}33` }} />
+          <span className="hud-corner hud-corner--br" style={{ borderColor: `${d.color}33` }} />
 
+          <div>
+            <div style={{ fontFamily: 'var(--font-hud)', fontSize: 8, letterSpacing: '0.2em', color: `${d.color}66`, marginBottom: 3 }}>
+              {d.label} · {d.sublabel}
+            </div>
+            <div style={{ fontFamily: 'var(--font-hud)', fontSize: 9, color: 'var(--color-text-dim)', letterSpacing: '0.06em' }}>
+              {d.label === 'DOOR 01' ? 'Sharpest version of the obvious path'
+               : d.label === 'DOOR 02' ? 'Through the friction you have been avoiding'
+               : 'Built on the premise you are asking the wrong question'}
+            </div>
+          </div>
+          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 8, letterSpacing: '0.2em', color: `${d.color}44`, fontWeight: 900 }}>
+            LOCKED
+          </span>
+        </motion.div>
+      ))}
+    </motion.div>
 
+    {/* ── ZYVV WORDMARK — massive, tight ── */}
+    <motion.div
+      animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+      transition={{ duration: 0.3 }}
+      style={{ overflow: 'hidden', marginBottom: 6 }}
+    >
+      {/* Radar ring behind wordmark */}
+      <div style={{ position: 'relative' }}>
+        <div style={{
+          position: 'absolute',
+          top: '50%', left: -20,
+          width: 200, height: 200,
+          borderRadius: '50%',
+          border: '1px solid rgba(0,245,255,0.04)',
+          transform: 'translateY(-50%)',
+          pointerEvents: 'none',
+        }} />
+        <div
+          className="font-mono font-black"
+          style={{
+            fontSize: 'clamp(72px, 22vw, 110px)',
+            lineHeight: 0.85,
+            letterSpacing: '-0.05em',
+            color: '#ffffff',
+            textShadow: '0 0 60px rgba(0,245,255,0.12)',
+          }}
+        >
+          ZYVV
+        </div>
+      </div>
+    </motion.div>
 
-                {/* ZYVV wordmark */}
-                <motion.div
-                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
-                  transition={{ duration: 0.35, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                  className="mb-2"
-                >
-                  <motion.div
-                    variants={slamIn}
-                    initial={isReturning ? 'visible' : 'hidden'}
-                    animate="visible"
-                    custom={isReturning ? 0 : 0.4}
-                    className="font-mono font-black tracking-[-0.04em] text-white"
-                    style={{
-                      fontSize: 'clamp(72px, 22vw, 120px)',
-                      lineHeight: 0.85,
-                      letterSpacing: '-0.05em',
-                      textShadow: '0 0 80px rgba(0,245,255,0.18), 0 0 160px rgba(191,90,242,0.08)',
-                    }}
-                  >
-                    ZYVV
-                  </motion.div>
-                </motion.div>
+    {/* ── SUBHEAD ── */}
+    <motion.div
+      animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
+      transition={{ duration: 0.3 }}
+      style={{ overflow: 'hidden', marginBottom: 20 }}
+    >
+      <p style={{
+        fontFamily: 'var(--font-hud)',
+        fontSize: 10,
+        lineHeight: 1.7,
+        color: 'var(--color-text-secondary)',
+        letterSpacing: '0.04em',
+      }}>
+        NOT ADVICE. NOT PREDICTION.<br />
+        A DECISION PROTOCOL.<br />
+        <span style={{ color: 'var(--color-text-dim)' }}>
+          THREE DIVERGENT PATHS. ZERO CONSENSUS THINKING.
+        </span>
+      </p>
+    </motion.div>
 
-                {/* ── SUBHEADLINE — value proposition ── */}
-                <motion.div
-                  animate={{ height: isFocused ? 0 : 'auto', opacity: isFocused ? 0 : 1 }}
-                  transition={{ duration: 0.35, ease: 'easeInOut' }}
-                  style={{ overflow: 'hidden' }}
-                  className="mb-6"
-                >
-                  <motion.p
-                    variants={fadeUp}
-                    initial={isReturning ? 'visible' : 'hidden'}
-                    animate="visible"
-                    custom={isReturning ? 0 : 0.55}
-                    className="font-mono text-[11px] leading-[1.7] tracking-[0.04em]"
-                    style={{ color: '#444' }}
-                  >
-                    Not advice. Not prediction. A decision protocol.
-                    <br />
-                    ZYVV detects the assumption you didn&apos;t know you were making,
-                    <br />
-                    searches for evidence it&apos;s wrong,
-                    <br />
-                    and returns three structurally different paths built against verified reality.
-                  </motion.p>
-                </motion.div>
+    {/* ── INPUT AREA — codec mission briefing style ── */}
+    <div>
+      {/* Input panel header */}
+      <div className="hud-panel__header" style={{ marginBottom: 0, borderBottom: '1px solid var(--color-border-dim)' }}>
+        <span>SITUATION INPUT · MISSION BRIEFING</span>
+        <span style={{ color: 'var(--color-text-dim)' }}>
+          {situation.length}/{MAX_CHARS}
+        </span>
+      </div>
 
-                {/* TEXTAREA + BUTTON */}
-                <motion.div
-                  variants={shockwaveRise}
-                  initial={isReturning ? 'visible' : 'hidden'}
-                  animate="visible"
-                >
-                  {/* ── EXPLAINER above input ── */}
-                  <div className="mb-3">
-                    <p
-                      className="font-mono text-[11px] leading-[1.6] tracking-[0.03em]"
-                      style={{ color: '#00F5FF', opacity: 0.6 }}
-                    >
-                      Be specific. Vague input gets a vague breach.
-                    </p>
-                    <p
-                      className="font-mono text-[10px] mt-1 tracking-[0.02em]"
-                      style={{ color: '#2a2a2a' }}
-                    >
-                      e.g. "I&apos;m considering leaving my job to go solo but I have a mortgage and I&apos;m not sure the market timing is right."
-                    </p>
-                    <p
-                      className="font-mono text-[9px] mt-2 tracking-[0.06em]"
-                      style={{ color: '#2e2e2e' }}
-                    >
-                      ↓ type your situation — the three doors unlock on submission
-                    </p>
-                  </div>
+      <div style={{ position: 'relative', marginBottom: 8 }}>
+        {/* Corner brackets on textarea */}
+        <span className="hud-corner hud-corner--tl" />
+        <span className="hud-corner hud-corner--br" />
 
-                  <div className="relative mb-2">
-                    <textarea
-                      ref={textareaRef}
-                      value={situation}
-                      onChange={handleTextareaChange}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Describe a decision or situation you're stuck on. The more context the better."
-                      rows={4}
-                      className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm"
-                      style={{
-                        background: 'rgba(6,6,8,0.88)',
-                        backdropFilter: 'blur(12px)',
-                        border: `1px solid ${error ? '#FF2D55' : '#1e1e1e'}`,
-                        color: '#fff',
-                        outline: 'none',
-                        resize: 'none',
-                        minHeight: 120,
-                        transition: 'border-color 0.2s, box-shadow 0.2s',
-                      }}
-                      onFocus={(e) => {
-                        if (situation.length === 0) return
-                        setIsFocused(true)
-                        if (!error) e.currentTarget.style.borderColor = '#00F5FF'
-                        e.currentTarget.style.boxShadow = '0 0 22px rgba(0,245,255,0.13)'
-                      }}
-                      onBlur={(e) => {
-                        setIsFocused(false)
-                        if (!error) e.currentTarget.style.borderColor = '#1e1e1e'
-                        e.currentTarget.style.boxShadow = 'none'
-                      }}
-                      autoFocus
-                      spellCheck
-                      aria-label="Describe your situation"
-                    />
-                    {isNearLimit && (
-                      <div
-                        className="absolute bottom-3 right-3 font-mono text-[10px]"
-                        style={{ color: situation.length >= MAX_CHARS - 50 ? '#FF2D55' : '#444' }}
-                      >
-                        {charsLeft}
-                      </div>
-                    )}
-                  </div>
+        <textarea
+          ref={textareaRef}
+          value={situation}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
+          placeholder="State your situation. Be specific. Vague input gets vague doors."
+          rows={4}
+          style={{
+            width: '100%',
+            fontFamily: 'var(--font-hud)',
+            fontSize: 13,
+            lineHeight: 1.7,
+            padding: '14px 16px',
+            background: 'var(--color-panel)',
+            border: `1px solid ${error ? '#FF2D55' : 'var(--color-border-dim)'}`,
+            borderTop: 'none',
+            borderRadius: '0 0 2px 2px',
+            color: 'var(--color-text-primary)',
+            outline: 'none',
+            resize: 'none',
+            minHeight: 110,
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+          }}
+          onFocus={(e) => {
+            setIsFocused(true)
+            e.currentTarget.style.borderColor = 'var(--color-border-hot)'
+            e.currentTarget.style.boxShadow = '0 0 0 1px rgba(0,245,255,0.1), inset 0 0 30px rgba(0,245,255,0.02)'
+          }}
+          onBlur={(e) => {
+            setIsFocused(false)
+            if (!error) e.currentTarget.style.borderColor = 'var(--color-border-dim)'
+            e.currentTarget.style.boxShadow = 'none'
+          }}
+          autoFocus
+          spellCheck
+          aria-label="Describe your situation"
+        />
+      </div>
 
-                  {/* ── MIN LENGTH PROGRESS BAR ── */}
-                  <AnimatePresence>
-                    {!canSubmit && situation.length > 0 && (
-                      <MinLengthBar current={situation.trim().length} min={MIN_CHARS} />
-                    )}
-                  </AnimatePresence>
+      {/* Min length bar */}
+      <AnimatePresence>
+        {!canSubmit && situation.length > 0 && (
+          <MinLengthBar current={situation.trim().length} min={MIN_CHARS} />
+        )}
+      </AnimatePresence>
 
-                  <AnimatePresence>
-                    {error && (
-                      <motion.p
-                        key="error"
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="font-mono text-[10px] mb-3 tracking-[0.06em]"
-                        style={{ color: '#FF2D55' }}
-                      >
-                        {error}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+      {/* Error */}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            key="error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            style={{ fontFamily: 'var(--font-hud)', fontSize: 9, color: '#FF2D55', letterSpacing: '0.1em', marginBottom: 8 }}
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
-                  {/* ── TACTICAL DUAL-ENGINE API MATRIX ── */}
-                  <div className="w-full mt-6 mb-5 border border-[#1a1a1a] rounded-sm bg-[#040406]/90 overflow-hidden zyvv-api-matrix">
-                    {/* Header bar */}
-                    <div className="flex items-center justify-between px-4 py-2 bg-[#0a0a0f] border-b border-[#1a1a1a]">
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#00F5FF] animate-pulse" />
-                        <span className="font-mono text-[9px] font-black tracking-[0.15em] text-[#666]">
-                          INTELLIGENCE ENGINE
-                        </span>
-                      </div>
-                      <span className="font-mono text-[8px] text-[#333] tracking-[0.05em]">
-                        SELECT BEFORE LAUNCH
-                      </span>
-                    </div>
-                    {/* Dual engine tracks */}
-                    <div className="grid grid-cols-2 border-b border-[#1a1a1a]">
-                      {/* MANA */}
-                      <button
-                        type="button"
-                        onClick={() => setVersion('mana')}
-                        className="flex flex-col text-left p-4 transition-all duration-300 outline-none zyvv-api-matrix-btn"
-                        style={{
-                          background: version === 'mana' ? 'rgba(0, 245, 255, 0.03)' : 'transparent',
-                          borderRight: '1px solid #1a1a1a',
-                        }}
-                      >
-                        <div className="flex items-center justify-between w-full mb-2">
-                          <span className="font-mono text-[11px] font-black tracking-[0.08em]"
-                            style={{ color: version === 'mana' ? '#ffffff' : '#444' }}>
-                            MANA API
-                          </span>
-                          <span className="font-mono text-[8px]"
-                            style={{ color: version === 'mana' ? '#00F5FF' : '#222' }}>
-                            {version === 'mana' ? '● ENGAGED' : '◈ STANDBY'}
-                          </span>
-                        </div>
-                        <p className="font-mono text-[9px] leading-relaxed mb-2"
-                          style={{ color: version === 'mana' ? '#555' : '#333' }}>
-                          Fetches one verified external signal. Injects it as ground truth before generating your three doors.
-                        </p>
-                        <div className="flex gap-1 mb-3 flex-wrap">
-                          <span className="font-mono text-[7px] font-black tracking-[0.1em] px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(0,245,255,0.07)', color: '#00F5FF' }}>PASS 1 — QUERY</span>
-                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(0,245,255,0.04)', color: 'rgba(0,245,255,0.5)' }}>PASS 2 — SIGNAL</span>
-                        </div>
-                        <span className="font-mono text-[8px] tracking-[0.05em] text-[#2a2a2a] mt-auto">
-                          POST /api/v1/mana/doors
-                        </span>
-                      </button>
-                      {/* YUGA */}
-                      <button
-                        type="button"
-                        onClick={() => setVersion('yuga')}
-                        className="flex flex-col text-left p-4 transition-all duration-300 outline-none zyvv-api-matrix-btn"
-                        style={{
-                          background: version === 'yuga' ? 'rgba(191, 90, 242, 0.03)' : 'transparent',
-                        }}
-                      >
-                        <div className="flex items-center justify-between w-full mb-2">
-                          <span className="font-mono text-[11px] font-black tracking-[0.08em]"
-                            style={{ color: version === 'yuga' ? '#ffffff' : '#444' }}>
-                            YUGA API
-                          </span>
-                          <span className="font-mono text-[8px]"
-                            style={{ color: version === 'yuga' ? '#BF5AF2' : '#222' }}>
-                            {version === 'yuga' ? '● ENGAGED' : '◈ STANDBY'}
-                          </span>
-                        </div>
-                        <p className="font-mono text-[9px] leading-relaxed mb-2"
-                          style={{ color: version === 'yuga' ? '#555' : '#333' }}>
-                          Finds the assumption you didn&apos;t state. Searches for evidence it&apos;s wrong. Rebuilds all three doors against the breach.
-                        </p>
-                        <div className="flex gap-1 mb-3 flex-wrap">
-                          <span className="font-mono text-[7px] font-black tracking-[0.1em] px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(191,90,242,0.07)', color: '#BF5AF2' }}>PASS 1 — EXTRACT</span>
-                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(191,90,242,0.04)', color: 'rgba(191,90,242,0.5)' }}>PASS 2 — BREACH</span>
-                          <span className="font-mono text-[7px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(191,90,242,0.04)', color: 'rgba(191,90,242,0.5)' }}>PASS 3 — COMPRESS</span>
-                        </div>
-                        <span className="font-mono text-[8px] tracking-[0.05em] text-[#2a2a2a] mt-auto">
-                          POST /api/v1/yuga/doors
-                        </span>
-                      </button>
-                    </div>
-                    {/* Early partner access tray */}
-                    <div className="px-4 py-2.5 bg-[#050507] flex items-center justify-between">
-                      <span className="font-mono text-[8px] text-[#444] tracking-[0.02em]">
-                        API ACCESS · EARLY PARTNER PROGRAM
-                      </span>
-                      <span className="font-mono text-[8px] font-bold tracking-[0.1em] text-[#00F5FF]">
-                        REQUEST ACCESS →
-                      </span>
-                    </div>
-                  </div>
+      {/* ── INTELLIGENCE ENGINE SELECTOR ── */}
+      <div style={{
+        border: '1px solid var(--color-border-dim)',
+        borderRadius: 2,
+        overflow: 'hidden',
+        marginTop: 12,
+        marginBottom: 14,
+        background: 'var(--color-panel)',
+      }}>
+        <div className="hud-panel__header">
+          <span>INTELLIGENCE ENGINE · SELECT BEFORE LAUNCH</span>
+          <span className="readout-blink">●</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid var(--color-border-dim)' }}>
+          {/* MANA */}
+          <button
+            type="button"
+            onClick={() => setVersion('mana')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              textAlign: 'left',
+              padding: '12px 14px',
+              background: version === 'mana' ? 'rgba(0,245,255,0.04)' : 'transparent',
+              borderRight: '1px solid var(--color-border-dim)',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+              outline: 'none',
+              border: 'none',
+              borderRight: '1px solid var(--color-border-dim)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: 6 }}>
+              <span style={{ fontFamily: 'var(--font-hud)', fontSize: 10, fontWeight: 900, letterSpacing: '0.1em', color: version === 'mana' ? '#ffffff' : 'var(--color-text-secondary)' }}>
+                MANA
+              </span>
+              <span style={{ fontFamily: 'var(--font-hud)', fontSize: 8, color: version === 'mana' ? '#00F5FF' : 'var(--color-text-dim)' }}>
+                {version === 'mana' ? '● ACTIVE' : '○ STANDBY'}
+              </span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+              Verified external signal injected as ground truth before door generation.
+            </p>
+            <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, color: 'var(--color-text-dim)', letterSpacing: '0.1em' }}>
+              POST /api/v1/mana/doors
+            </span>
+          </button>
 
-                  {/* ── PRIMARY CTA ── */}
-                  <button
-                    ref={submitBtnRef}
-                    onClick={handleSubmit}
-                    disabled={!canSubmit}
-                    className={`w-full font-mono text-[13px] font-black tracking-[0.22em] uppercase py-5 rounded-sm${canSubmit ? ' btn-launch' : ''}`}
-                    style={{
-                      background: canSubmit
-                        ? 'linear-gradient(135deg, #00F5FF 0%, #0088aa 100%)'
-                        : '#0a0a0a',
-                      color: canSubmit ? '#000' : '#2a2a2a',
-                      border: canSubmit ? 'none' : '1px solid #1a1a1a',
-                      cursor: canSubmit ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.25s',
-                      boxShadow: canSubmit ? '0 0 30px rgba(0,245,255,0.2)' : 'none',
-                      letterSpacing: '0.22em',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (canSubmit) {
-                        e.currentTarget.style.boxShadow = '0 0 60px rgba(0,245,255,0.45), 0 0 120px rgba(191,90,242,0.2)'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = canSubmit ? '0 0 30px rgba(0,245,255,0.2)' : 'none'
-                      e.currentTarget.style.transform = 'none'
-                    }}
-                    aria-label="Open the portal"
-                  >
-                    {canSubmit ? 'OPEN THE PORTAL' : 'OPEN THE PORTAL'}
-                  </button>
+          {/* YUGA */}
+          <button
+            type="button"
+            onClick={() => setVersion('yuga')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              textAlign: 'left',
+              padding: '12px 14px',
+              background: version === 'yuga' ? 'rgba(191,90,242,0.04)' : 'transparent',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+              outline: 'none',
+              border: 'none',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: 6 }}>
+              <span style={{ fontFamily: 'var(--font-hud)', fontSize: 10, fontWeight: 900, letterSpacing: '0.1em', color: version === 'yuga' ? '#ffffff' : 'var(--color-text-secondary)' }}>
+                YUGA
+              </span>
+              <span style={{ fontFamily: 'var(--font-hud)', fontSize: 8, color: version === 'yuga' ? '#BF5AF2' : 'var(--color-text-dim)' }}>
+                {version === 'yuga' ? '● ACTIVE' : '○ STANDBY'}
+              </span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, lineHeight: 1.5, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+              Extracts unstated assumption. Searches for counter-evidence. Rebuilds all doors against the breach.
+            </p>
+            <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, color: 'var(--color-text-dim)', letterSpacing: '0.1em' }}>
+              POST /api/v1/yuga/doors
+            </span>
+          </button>
+        </div>
+        <div style={{
+          padding: '7px 14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'var(--color-panel-raised)',
+        }}>
+          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: 'var(--color-text-dim)' }}>
+            API ACCESS · EARLY PARTNER PROGRAM
+          </span>
+          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: '#00F5FF', fontWeight: 900 }}>
+            REQUEST ACCESS →
+          </span>
+        </div>
+      </div>
 
-                  {/* ── KEYBOARD HINT ── */}
-                  {canSubmit && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3, delay: 0.2 }}
-                      className="font-mono text-[9px] text-center mt-2 tracking-[0.08em]"
-                      style={{ color: '#222' }}
-                    >
-                      or press ⌘ + Enter
-                    </motion.p>
-                  )}
+      {/* ── LAUNCH BUTTON ── */}
+      <button
+        ref={submitBtnRef}
+        onClick={handleSubmit}
+        disabled={!canSubmit}
+        style={{
+          width: '100%',
+          fontFamily: 'var(--font-hud)',
+          fontSize: 11,
+          fontWeight: 900,
+          letterSpacing: '0.28em',
+          textTransform: 'uppercase',
+          padding: '16px 0',
+          borderRadius: 2,
+          background: canSubmit
+            ? 'linear-gradient(90deg, rgba(0,245,255,0.12) 0%, rgba(0,245,255,0.06) 100%)'
+            : 'transparent',
+          color: canSubmit ? '#00F5FF' : 'var(--color-text-dim)',
+          border: `1px solid ${canSubmit ? 'rgba(0,245,255,0.4)' : 'var(--color-border-dim)'}`,
+          cursor: canSubmit ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+          boxShadow: canSubmit ? '0 0 20px rgba(0,245,255,0.08), inset 0 0 20px rgba(0,245,255,0.03)' : 'none',
+        }}
+        onMouseEnter={(e) => {
+          if (!canSubmit) return
+          e.currentTarget.style.background = 'rgba(0,245,255,0.14)'
+          e.currentTarget.style.boxShadow = '0 0 40px rgba(0,245,255,0.2), inset 0 0 30px rgba(0,245,255,0.06)'
+          e.currentTarget.style.borderColor = 'rgba(0,245,255,0.7)'
+        }}
+        onMouseLeave={(e) => {
+          if (!canSubmit) return
+          e.currentTarget.style.background = 'linear-gradient(90deg, rgba(0,245,255,0.12) 0%, rgba(0,245,255,0.06) 100%)'
+          e.currentTarget.style.boxShadow = '0 0 20px rgba(0,245,255,0.08), inset 0 0 20px rgba(0,245,255,0.03)'
+          e.currentTarget.style.borderColor = 'rgba(0,245,255,0.4)'
+        }}
+        aria-label="Open the portal"
+        className={canSubmit ? 'btn-launch' : ''}
+      >
+        {canSubmit ? '[ OPEN THE PORTAL ]' : '[ OPEN THE PORTAL ]'}
+      </button>
 
-                  
-                </motion.div>
-              </motion.section>
-            )}
+      {canSubmit && (
+        <p style={{ fontFamily: 'var(--font-hud)', fontSize: 8, color: 'var(--color-text-dim)', textAlign: 'center', marginTop: 8, letterSpacing: '0.1em' }}>
+          ⌘ + ENTER
+        </p>
+      )}
+    </div>
+  </motion.section>
+)}
 
             {/* LOADING */}
             {phase === 'loading' && (
-              <motion.section
-                key="loading-phase"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center justify-center py-24"
-                aria-live="polite"
-              >
-                <div
-                  className="font-mono text-[10px] font-black tracking-[0.22em] uppercase mb-8"
-                  style={{
-                    color: '#00F5FF',
-                    textShadow: '0 0 30px rgba(0,245,255,0.5)',
-                    animation: 'loadingPulse 2s ease-in-out infinite',
-                  }}
-                >
-                  THE VOID IS THINKING
-                </div>
-                <div className="flex gap-3">
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
-                  <span className="dot-pulse" />
-                </div>
-              </motion.section>
-            )}
+  <motion.section
+    key="loading-phase"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.4 }}
+    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 80, paddingBottom: 80 }}
+    aria-live="polite"
+  >
+    {/* MGS codec loading panel */}
+    <div style={{
+      width: '100%',
+      background: 'var(--color-panel)',
+      border: '1px solid var(--color-border-dim)',
+      borderRadius: 2,
+      padding: 20,
+      marginBottom: 16,
+    }}>
+      <div className="hud-panel__header" style={{ marginBottom: 12 }}>
+        <span>PROCESSING SITUATION INPUT</span>
+        <span className="readout-blink" style={{ color: '#00FF41' }}>● RUNNING</span>
+      </div>
+      <div className="transmission-sweep" style={{ marginBottom: 14 }} />
+      <div style={{ fontFamily: 'var(--font-hud)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--color-text-secondary)', marginBottom: 16 }}>
+        ADVERSARIAL LOGIC PROTOCOL · DIVERGENCE ENGINE ACTIVE
+      </div>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+        <span className="dot-pulse" />
+        <span className="dot-pulse" />
+        <span className="dot-pulse" />
+      </div>
+    </div>
+  </motion.section>
+)}
 
             {/* MIRROR */}
             {phase === 'roast' && (
@@ -1106,15 +1093,20 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
-                  style={{ color: '#BF5AF2', textShadow: '0 0 20px rgba(191,90,242,0.4)' }}
-                >
-                  THE MIRROR
-                </motion.div>
+               <div style={{
+  fontFamily: 'var(--font-hud)',
+  fontSize: 8,
+  fontWeight: 900,
+  letterSpacing: '0.28em',
+  color: '#BF5AF2',
+  marginBottom: 16,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+}}>
+  <span className="readout-blink" style={{ color: '#00FF41' }}>●</span>
+  THE MIRROR · DIAGNOSTIC OUTPUT
+</div>
 
                 {/* ── EXPECTATION FRAMING — prevents confrontational output feeling like an error ── */}
                 <motion.p

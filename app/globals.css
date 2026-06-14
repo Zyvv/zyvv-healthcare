@@ -142,57 +142,48 @@
    ============================================================ */
 
 :root {
-  /* ── Void palette ── */
-  --color-black:        #000000;
-  --color-void:         #000005;
-  --color-dim:          #08080F;
-  --color-border:       #1a1a2e;
-  --color-muted:        #3a3a5c;
+  /* Canvas */
+  --color-void:         #000000;
+  --color-surface:      #030308;
+  --color-panel:        #07070f;
+  --color-panel-raised: #0a0a14;
 
-  /* ── Signal colors ── */
+  /* Grid / structure */
+  --color-grid:         rgba(0, 245, 255, 0.04);
+  --color-border-dim:   rgba(0, 245, 255, 0.08);
+  --color-border-mid:   rgba(0, 245, 255, 0.18);
+  --color-border-hot:   rgba(0, 245, 255, 0.55);
+
+  /* Signal — phosphor green MGS tint on active state */
+  --color-phosphor:     #00FF41;
+  --color-phosphor-dim: rgba(0, 255, 65, 0.35);
+
+  /* Primary accent */
   --color-cyan:         #00F5FF;
-  --color-green:        #00FF94;
-  --color-red:          #FF2D55;
-  --color-purple:       #BF5AF2;
-  --color-amber:        #FFB830;
-  --color-white:        #FFFFFF;
+  --color-cyan-dim:     rgba(0, 245, 255, 0.15);
+  --color-cyan-glow:    rgba(0, 245, 255, 0.35);
 
-  /* ── Glow radii ── */
-  --glow-cyan:          rgba(0, 245, 255, 0.25);
-  --glow-green:         rgba(0, 255, 148, 0.25);
-  --glow-red:           rgba(255, 45, 85,  0.25);
-  --glow-purple:        rgba(191, 90, 242, 0.25);
-  --glow-amber:         rgba(255, 184, 48, 0.25);
+  /* Door accents */
+  --color-door-1:       #00F5FF;   /* conventional */
+  --color-door-2:       #FFB830;   /* contrarian */
+  --color-door-3:       #BF5AF2;   /* alien */
 
-  /* ── Mirror phase deep space ── */
-  --color-mirror-bg:    #0a0018;
-  --color-mirror-deep:  #050010;
-  --glow-mirror:        rgba(191, 90, 242, 0.4);
+  /* Text */
+  --color-text-primary:   #e8f4f8;
+  --color-text-secondary: #4a6572;
+  --color-text-dim:       #1e2a30;
+  --color-text-readout:   #00FF41;  /* MGS phosphor green for status readouts */
 
-  /* ── Door accents (defaults; overridden by data-door-index) ── */
-  --door-accent:        var(--color-cyan);
-  --door-glow:          rgba(0, 245, 255, 0.15);
+  /* Scanline noise */
+  --scanline-opacity: 0.03;
 
-  /* ── Typography ── */
-  --font-sans:          var(--font-inter), system-ui, sans-serif;
-  --font-mono:          var(--font-mono), 'Courier New', Courier, monospace;
+  /* Typography */
+  --font-hud:  var(--font-mono), 'Courier New', monospace;
+  --font-body: var(--font-inter), system-ui, sans-serif;
 
-  /* ── Easing ── */
-  --ease-out-expo:      cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-expo:       cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-in-out-sine:   cubic-bezier(0.37, 0, 0.63, 1);
-  --ease-spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* ── Durations ── */
-  --duration-instant:   80ms;
-  --duration-fast:      150ms;
-  --duration-base:      400ms;
-  --duration-slow:      600ms;
-  --duration-cinematic: 1200ms;
-
-  /* ── Layout ── */
-  --max-mobile:         390px;
-  --max-card:           420px;
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-terminal: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ============================================================
@@ -877,4 +868,143 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
 .zyvv-api-matrix code {
   font-family: var(--font-mono), monospace;
   font-size: 8px;
+}
+
+/* ── HUD Grid overlay — space radar grid behind everything ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Scanline texture — MGS phosphor screen feel ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+}
+
+/* ── Corner bracket — reusable HUD corner decoration ── */
+.hud-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--color-border-mid);
+  border-style: solid;
+  border-width: 0;
+}
+.hud-corner--tl { top: 0; left: 0;  border-top-width: 1px; border-left-width: 1px; }
+.hud-corner--tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+.hud-corner--bl { bottom: 0; left: 0;  border-bottom-width: 1px; border-left-width: 1px; }
+.hud-corner--br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* ── HUD Panel base ── */
+.hud-panel {
+  position: relative;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border-dim);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* ── HUD Panel header ── */
+.hud-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px 6px;
+  border-bottom: 1px solid var(--color-border-dim);
+  background: var(--color-panel-raised);
+  font-family: var(--font-hud);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* ── MGS Codec portrait frame ── */
+.codec-frame {
+  position: relative;
+  border: 1px solid var(--color-border-mid);
+  border-radius: 2px;
+  background: var(--color-panel);
+  overflow: hidden;
+}
+.codec-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 255, 65, 0.04) 0%,
+    transparent 40%,
+    rgba(0, 255, 65, 0.02) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Radar ring — space HUD circular element ── */
+.radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-dim);
+  pointer-events: none;
+}
+
+/* ── Status readout — MGS style blinking status ── */
+@keyframes readoutBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.3; }
+}
+.readout-blink {
+  animation: readoutBlink 1.1s step-end infinite;
+  color: var(--color-text-readout);
+}
+
+/* ── HUD label ── */
+.hud-label {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* ── Transmission line sweep ── */
+@keyframes transmissionSweep {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateX(200%); opacity: 0; }
+}
+.transmission-sweep {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-cyan), transparent);
+  animation: transmissionSweep 1.4s ease-in-out infinite;
+}
+
+/* ── Noise static — very subtle, on dark panels ── */
+@keyframes noiseShift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1px, 1px); }
+  50%  { transform: translate(1px, -1px); }
+  75%  { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
 }
