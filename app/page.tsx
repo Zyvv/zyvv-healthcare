@@ -993,8 +993,7 @@ export default function HomePage() {
           <a
             href="mailto:zyvv.contact@gmail.com?subject=ZYVV%20API%20Access%20Request&body=Name%3A%0ACompany%3A%0AUse%20case%3A%0AEngine%20needed%20(MANA%2FYUGA%2FBoth)%3A"
             className="font-mono text-[8px] font-bold tracking-[0.1em] hover:opacity-70 transition-opacity"
-            style={{ color: '#666', textDecoration: 'none' }}
-            style={{ textDecoration: 'none' }}
+            style={{ textDecoration: 'none', color: '#00F5FF' }}
           >
             API REQUEST ACCESS →
           </a>
