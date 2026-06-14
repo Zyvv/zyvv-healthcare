@@ -1023,18 +1023,17 @@ export default function HomePage() {
                         transition={{ duration: 0.4, delay: 1.2 }}
                         style={{ marginTop: '32px', textAlign: 'center' }}
                       >
-                        <p
-                          className="font-mono text-[9px] tracking-[0.06em]"
-                          style={{ color: '#2a2a2a', marginBottom: '4px' }}
-                        >
-                          building something?
-                        </p>
-                        <p
-                          className="font-mono text-[9px] tracking-[0.06em]"
-                          style={{ color: '#333', borderBottom: '1px solid #222', display: 'inline', paddingBottom: '1px' }}
-                        >
-                          POST /api/v1/doors · /v1/choice · /v1/interrogate
-                        </p>
+                        <div className="font-mono text-[9px] tracking-[0.2em] text-zinc-500 mb-2 flex items-center justify-center gap-2 uppercase">
+  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/60 animate-pulse" />
+  SECURE ENDPOINTS · PROTOCOL ACCESS
+</div>
+<div className="inline-block font-mono text-[10px] text-zinc-400 bg-zinc-950/80 border border-zinc-800/60 px-4 py-2 rounded-sm max-w-full break-all">
+  <span className="text-cyan-400/70 font-bold">POST</span> /v1/doors
+  <span className="mx-2 text-zinc-700">|</span>
+  <span className="text-cyan-400/70 font-bold">POST</span> /v1/choice
+  <span className="mx-2 text-zinc-700">|</span>
+  <span className="text-cyan-400/70 font-bold">POST</span> /v1/interrogate
+</div>
                       </motion.div>
                     )}
                   </AnimatePresence>
