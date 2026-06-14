@@ -88,7 +88,7 @@ const shockwaveRise = {
 const MAX_CHARS = 2000
 const WARN_CHARS = 1800
 const MIN_CHARS = 10
-const DOOR_REVEAL_DELAY = 800
+const DOOR_REVEAL_DELAY = 1600
 
 // ── Canvas warp engine ───────────────────────────────────────
 
@@ -322,9 +322,9 @@ function MirrorReveal({ text, onComplete }: { text: string; onComplete: () => vo
         if (i >= text.length) {
           clearInterval(interval)
           setDone(true)
-          setTimeout(onComplete, 1600)
+          setTimeout(onComplete, 2200)
         }
-      }, 8)
+      }, 18)
       return () => clearInterval(interval)
     }, 700)
 
@@ -1247,7 +1247,7 @@ export default function HomePage() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div
-                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6"
+                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-5"
                   style={{
                     color: DOOR_CONFIGS[chosenDoor.door_type].glowColor,
                     textShadow: `0 0 20px ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}66`,
@@ -1256,28 +1256,66 @@ export default function HomePage() {
                   INTERROGATION
                 </div>
 
-                <p className="font-mono text-[12px] leading-[1.65] mb-6" style={{ color: '#555' }}>
-                  You chose{' '}
-                  <span style={{ color: DOOR_CONFIGS[chosenDoor.door_type].glowColor }}>
-                    {chosenDoor.title}
-                  </span>
-                  . What&apos;s your doubt?
-                </p>
+                {/* Panel */}
+                <div
+                  style={{
+                    background: '#080808',
+                    border: `1px solid ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}33`,
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                    marginBottom: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 14px 7px',
+                      borderBottom: `1px solid ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}18`,
+                      background: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}06`,
+                    }}
+                  >
+                    <span
+                      className="font-mono text-[8px] font-black tracking-[0.16em] uppercase"
+                      style={{ color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}88` }}
+                    >
+                      DOOR CHOSEN
+                    </span>
+                    <span
+                      className="font-mono text-[8px] tracking-[0.1em]"
+                      style={{ color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}55` }}
+                    >
+                      ● ACTIVE
+                    </span>
+                  </div>
+                  <div style={{ padding: '12px 14px' }}>
+                    <p className="font-mono text-[12px] leading-[1.65]" style={{ color: '#555' }}>
+                      You chose{' '}
+                      <span style={{ color: DOOR_CONFIGS[chosenDoor.door_type].glowColor }}>
+                        {chosenDoor.title}
+                      </span>
+                      . What&apos;s your doubt?
+                    </p>
+                  </div>
+                </div>
 
                 <textarea
                   value={objection}
                   onChange={(e) => setObjection(e.target.value)}
                   placeholder="But I don't have enough time for that..."
                   rows={3}
-                  className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 rounded-sm mb-4"
+                  className="w-full font-mono text-[14px] leading-[1.65] px-4 py-4 mb-4"
                   style={{
                     background: 'rgba(6,6,8,0.88)',
                     backdropFilter: 'blur(12px)',
                     border: '1px solid #1e1e1e',
+                    borderRadius: 6,
                     color: '#fff',
                     outline: 'none',
                     resize: 'none',
                     transition: 'border-color 0.2s',
+                    display: 'block',
                   }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = DOOR_CONFIGS[chosenDoor.door_type].glowColor)}
                   onBlur={(e) => (e.currentTarget.style.borderColor = '#1e1e1e')}
@@ -1286,9 +1324,15 @@ export default function HomePage() {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={handleInterrogate}
+                    onTouchEnd={(e) => {
+                      e.preventDefault()
+                      if (objection.trim().length >= 4) handleInterrogate()
+                    }}
+                    onClick={() => {
+                      if (objection.trim().length >= 4) handleInterrogate()
+                    }}
                     disabled={objection.trim().length < 4}
-                    className="flex-1 font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                    className="flex-1 font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-[5px]"
                     style={{
                       background: objection.trim().length >= 4 ? DOOR_CONFIGS[chosenDoor.door_type].glowColor : '#0a0a0a',
                       color: objection.trim().length >= 4 ? '#000' : '#2a2a2a',
@@ -1300,8 +1344,9 @@ export default function HomePage() {
                     INTERROGATE
                   </button>
                   <button
+                    onTouchEnd={(e) => { e.preventDefault(); setPhase('share') }}
                     onClick={() => setPhase('share')}
-                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-5 py-4 rounded-sm"
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-5 py-4 rounded-[5px]"
                     style={{ color: '#333', border: '1px solid #1a1a1a', background: 'transparent', cursor: 'pointer' }}
                   >
                     SKIP
@@ -1347,43 +1392,138 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-6" style={{ color: '#BF5AF2' }}>
+                {/* Section label */}
+                <div
+                  className="font-mono text-[9px] font-black tracking-[0.22em] uppercase mb-5"
+                  style={{ color: '#BF5AF2', textShadow: '0 0 20px rgba(191,90,242,0.4)' }}
+                >
                   REFINED PATH
                 </div>
 
-                <div className="border-l-2 pl-4 mb-6" style={{ borderColor: '#FF2D55' }}>
-                  <div className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: '#FF2D5566' }}>
-                    DIAGNOSIS
-                  </div>
-                  <p className="font-mono text-[12px] leading-[1.65]" style={{ color: '#888' }}>
-                    {refinement.critique}
-                  </p>
-                </div>
-
-                <div className="border-l-2 pl-4 mb-6" style={{ borderColor: DOOR_CONFIGS[chosenDoor.door_type].glowColor }}>
+                {/* DIAGNOSIS panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.05 }}
+                  style={{
+                    background: '#080808',
+                    border: '1px solid rgba(255,45,85,0.3)',
+                    borderRadius: 6,
+                    boxShadow: '0 0 0 1px rgba(255,45,85,0.08), inset 0 0 20px rgba(255,45,85,0.02)',
+                    marginBottom: 10,
+                    overflow: 'hidden',
+                  }}
+                >
                   <div
-                    className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
-                    style={{ color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}88` }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 14px 7px',
+                      borderBottom: '1px solid rgba(255,45,85,0.15)',
+                      background: 'rgba(255,45,85,0.04)',
+                    }}
                   >
-                    REFINED PATH
+                    <span className="font-mono text-[8px] font-black tracking-[0.18em] uppercase" style={{ color: 'rgba(255,45,85,0.7)' }}>
+                      DIAGNOSIS
+                    </span>
+                    <span className="font-mono text-[8px] tracking-[0.1em]" style={{ color: 'rgba(255,45,85,0.3)' }}>
+                      ● OBJECTION PROCESSED
+                    </span>
                   </div>
-                  <p className="font-mono text-[12px] leading-[1.65]" style={{ color: '#ccc' }}>
-                    {refinement.refined_path}
-                  </p>
-                </div>
-
-                <div className="border-l-2 pl-4 mb-8" style={{ borderColor: '#333' }}>
-                  <div className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2" style={{ color: '#333' }}>
-                    NEXT QUESTION
+                  <div style={{ padding: '14px' }}>
+                    <p className="font-mono text-[12px] leading-[1.7]" style={{ color: '#888' }}>
+                      {refinement.critique}
+                    </p>
                   </div>
-                  <p className="font-mono text-[12px] leading-[1.65]" style={{ color: '#555' }}>
-                    {refinement.next_interrogation_vector}
-                  </p>
-                </div>
+                </motion.div>
 
-                <button
+                {/* REFINED PATH panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  style={{
+                    background: '#080808',
+                    border: `1px solid ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}44`,
+                    borderRadius: 6,
+                    boxShadow: `0 0 0 1px ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}10, inset 0 0 24px ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}04`,
+                    marginBottom: 10,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 14px 7px',
+                      borderBottom: `1px solid ${DOOR_CONFIGS[chosenDoor.door_type].glowColor}18`,
+                      background: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}06`,
+                    }}
+                  >
+                    <span
+                      className="font-mono text-[8px] font-black tracking-[0.18em] uppercase"
+                      style={{ color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}cc` }}
+                    >
+                      REFINED PATH
+                    </span>
+                    <span
+                      className="font-mono text-[8px] tracking-[0.1em]"
+                      style={{ color: `${DOOR_CONFIGS[chosenDoor.door_type].glowColor}44` }}
+                    >
+                      ● UPGRADED
+                    </span>
+                  </div>
+                  <div style={{ padding: '14px' }}>
+                    <p className="font-mono text-[12px] leading-[1.7]" style={{ color: '#ccc' }}>
+                      {refinement.refined_path}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* NEXT QUESTION panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.35 }}
+                  style={{
+                    background: '#080808',
+                    border: '1px solid #1e1e1e',
+                    borderRadius: 6,
+                    marginBottom: 20,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 14px 7px',
+                      borderBottom: '1px solid #111',
+                    }}
+                  >
+                    <span className="font-mono text-[8px] font-black tracking-[0.18em] uppercase" style={{ color: '#333' }}>
+                      NEXT QUESTION
+                    </span>
+                    <span className="font-mono text-[8px] tracking-[0.1em]" style={{ color: '#222' }}>
+                      ● INTERROGATION VECTOR
+                    </span>
+                  </div>
+                  <div style={{ padding: '14px' }}>
+                    <p className="font-mono text-[12px] leading-[1.7]" style={{ color: '#555' }}>
+                      {refinement.next_interrogation_vector}
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
                   onClick={() => setPhase('share')}
-                  className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-sm"
+                  className="w-full font-mono text-[11px] font-black tracking-[0.22em] uppercase py-4 rounded-[5px]"
                   style={{
                     background: 'linear-gradient(135deg, #BF5AF2 0%, #7a22cc 100%)',
                     color: '#000',
@@ -1393,7 +1533,7 @@ export default function HomePage() {
                   }}
                 >
                   CONTINUE →
-                </button>
+                </motion.button>
               </motion.section>
             )}
 

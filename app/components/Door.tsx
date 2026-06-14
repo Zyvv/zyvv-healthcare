@@ -1,12 +1,19 @@
 // ============================================================
-// ZYVV — Door Component
+// ZYVV — Door Component (TACTICAL TERMINAL v2)
 // File: app/components/Door.tsx
+//
+// Design: Military / Metal Gear terminal aesthetic
+// - Rounded-corner rectangular panels (border-radius: 6px)
+// - Colored border glow per door type
+// - Typewriter reveal on description and why_it_works
+// - TRANSMISSION INCOMING → indicator before content appears
+// - Tap gate: button requires deliberate press, not scroll trigger
 // ============================================================
 
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DOOR_CONFIGS } from '@/lib/types'
 import type { Door, DoorType } from '@/lib/types'
 
@@ -19,56 +26,65 @@ interface DoorProps {
   onChoose: (door: Door) => void
 }
 
-const containerVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.18,
-      duration: 0.55,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
+// ── Typewriter hook ───────────────────────────────────────────
+
+function useTypewriter(text: string, speed = 14, startDelay = 0, enabled = true) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+  const iRef = useRef(0)
+
+  useEffect(() => {
+    if (!enabled) {
+      setDisplayed(text)
+      setDone(true)
+      return
+    }
+    setDisplayed('')
+    setDone(false)
+    iRef.current = 0
+
+    const delay = setTimeout(() => {
+      const interval = setInterval(() => {
+        iRef.current += 1
+        setDisplayed(text.slice(0, iRef.current))
+        if (iRef.current >= text.length) {
+          clearInterval(interval)
+          setDone(true)
+        }
+      }, speed)
+      return () => clearInterval(interval)
+    }, startDelay)
+
+    return () => clearTimeout(delay)
+  }, [text, speed, startDelay, enabled])
+
+  return { displayed, done }
 }
 
-const contentVariants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: 'auto',
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
+// ── Transmission indicator ────────────────────────────────────
+
+function TransmissionIndicator({ color }: { color: string }) {
+  const [dots, setDots] = useState('.')
+  useEffect(() => {
+    const t = setInterval(() => setDots((d) => (d.length >= 3 ? '.' : d + '.')), 380)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <span
+      style={{
+        fontFamily: 'monospace',
+        fontSize: 9,
+        letterSpacing: '0.18em',
+        color,
+        opacity: 0.7,
+      }}
+    >
+      RECEIVING DATA{dots}
+    </span>
+  )
 }
 
-const whyVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: 0.2,
-      duration: 0.4,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-}
-
-const ctaVariants = {
-  hidden: { opacity: 0, y: 6 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: 0.35,
-      duration: 0.4,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-}
+// ── Glyphs ────────────────────────────────────────────────────
 
 const CLOSED_GLYPHS: Record<DoorType, string> = {
   conventional: '◈',
@@ -82,6 +98,8 @@ const DOOR_LABELS: Record<DoorType, string> = {
   alien:        'The reframe',
 }
 
+// ── Component ─────────────────────────────────────────────────
+
 export default function Door({
   door,
   index,
@@ -91,183 +109,333 @@ export default function Door({
   onChoose,
 }: DoorProps) {
   const config = DOOR_CONFIGS[door.door_type]
-  const [isHovered, setIsHovered] = useState(false)
+  const [transmitting, setTransmitting] = useState(false)
+  const [contentReady, setContentReady] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
+  const choosingRef = useRef(false)
+
+  // Transmission → content sequence on reveal
+  useEffect(() => {
+    if (!isRevealed) return
+    setTransmitting(true)
+    setContentReady(false)
+    const t = setTimeout(() => {
+      setTransmitting(false)
+      setContentReady(true)
+    }, 900)
+    return () => clearTimeout(t)
+  }, [isRevealed])
+
+  const { displayed: descText, done: descDone } = useTypewriter(
+    door.description,
+    11,
+    0,
+    contentReady
+  )
+
+  const { displayed: whyText } = useTypewriter(
+    door.why_it_works,
+    10,
+    descDone ? 200 : 99999,
+    contentReady && descDone
+  )
 
   const canChoose = isRevealed && !isAnyChosen
 
-  const glowStyle = isChosen
-    ? { boxShadow: `0 0 40px ${config.glowColor}40, 0 0 80px ${config.glowColor}18, inset 0 0 40px ${config.glowColor}08` }
-    : isPressed && canChoose
-    ? { boxShadow: `0 0 50px ${config.glowColor}60` }
-    : isHovered && canChoose
-    ? { boxShadow: `0 0 28px ${config.glowColor}35` }
-    : {}
+  // Touch / click handler with debounce guard
+  const handleChoose = () => {
+    if (!canChoose || choosingRef.current) return
+    choosingRef.current = true
+    onChoose(door)
+  }
 
-  const borderStyle = isChosen
-    ? { borderColor: config.glowColor }
-    : isRevealed && canChoose
-    ? { borderColor: isHovered || isPressed ? `${config.glowColor}90` : `${config.glowColor}35` }
+  const borderColor = isChosen
+    ? config.glowColor
     : isRevealed
-    ? { borderColor: `${config.glowColor}35` }
-    : { borderColor: '#1a1a1a' }
+    ? `${config.glowColor}55`
+    : '#1e1e1e'
 
-  const opacity = isAnyChosen && !isChosen ? 0.3 : 1
-  const scale = isPressed && canChoose ? 0.985 : 1
+  const boxShadow = isChosen
+    ? `0 0 0 1px ${config.glowColor}, 0 0 32px ${config.glowColor}40, inset 0 0 40px ${config.glowColor}08`
+    : isPressed && canChoose
+    ? `0 0 0 1px ${config.glowColor}cc, 0 0 24px ${config.glowColor}50`
+    : isRevealed && !isAnyChosen
+    ? `0 0 0 1px ${config.glowColor}33, 0 0 12px ${config.glowColor}18`
+    : `0 0 0 1px ${borderColor}`
 
   return (
     <motion.div
-      custom={index}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      style={{ opacity, transition: 'opacity 0.5s ease' }}
-      data-door-index={index}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: isAnyChosen && !isChosen ? 0.25 : 1, y: 0 }}
+      transition={{
+        opacity: { duration: 0.5 },
+        y: { delay: index * 0.12, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+      }}
     >
-      <motion.div
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => { setIsHovered(false); setIsPressed(false) }}
+      <div
         onMouseDown={() => { if (canChoose) setIsPressed(true) }}
-        onMouseUp={() => setIsPressed(false)}
-        onTouchStart={() => { if (canChoose) setIsPressed(true) }}
-        onTouchEnd={() => {
-          setIsPressed(false)
-          if (canChoose) onChoose(door)
+        onMouseUp={() => { setIsPressed(false); handleChoose() }}
+        onMouseLeave={() => setIsPressed(false)}
+        onTouchStart={(e) => {
+          e.preventDefault()
+          if (canChoose) setIsPressed(true)
         }}
-        onClick={() => {
-          if (canChoose) onChoose(door)
+        onTouchEnd={(e) => {
+          e.preventDefault()
+          setIsPressed(false)
+          handleChoose()
         }}
         style={{
-          ...glowStyle,
-          ...borderStyle,
-          transform: `scale(${scale})`,
-          transition: 'box-shadow 0.3s ease, border-color 0.25s ease, transform 0.12s ease',
+          position: 'relative',
+          background: '#080808',
+          border: `1px solid ${borderColor}`,
+          borderRadius: 6,
+          boxShadow,
+          transition: 'box-shadow 0.3s ease, border-color 0.25s ease, transform 0.1s ease',
+          transform: isPressed && canChoose ? 'scale(0.987)' : 'scale(1)',
+          cursor: canChoose ? 'pointer' : 'default',
+          overflow: 'hidden',
         }}
-        className={[
-          'relative border rounded-sm',
-          'bg-[#080808]',
-          canChoose ? 'cursor-pointer' : 'cursor-default',
-        ].join(' ')}
       >
+        {/* ── Top status bar ── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px 8px',
+            borderBottom: `1px solid ${isRevealed ? `${config.glowColor}22` : '#111'}`,
+            background: isRevealed ? `${config.glowColor}08` : 'transparent',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'monospace',
+              fontSize: 9,
+              fontWeight: 900,
+              letterSpacing: '0.18em',
+              color: config.glowColor,
+              opacity: 0.6,
+            }}
+          >
+            {config.label.toUpperCase()} · DOOR {index + 1}
+          </span>
 
-        {/* ── CLOSED STATE ── */}
-        {!isRevealed && (
-          <div className="px-5 py-5 flex items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <span
-                className="font-mono text-[9px] font-black tracking-[0.18em] uppercase"
-                style={{ color: config.glowColor, opacity: 0.5 }}
-              >
-                DOOR {index + 1}
-              </span>
-              <span
-                className="font-mono text-[9px] tracking-[0.08em]"
-                style={{ color: '#2a2a2a' }}
-              >
-                {DOOR_LABELS[door.door_type]}
-              </span>
-            </div>
-
-            <span style={{ fontSize: 24, color: config.glowColor, opacity: 0.6 }}>
+          {!isRevealed && (
+            <span style={{ fontSize: 18, color: config.glowColor, opacity: 0.5 }}>
               {CLOSED_GLYPHS[door.door_type]}
             </span>
+          )}
 
+          {isRevealed && transmitting && (
+            <TransmissionIndicator color={config.glowColor} />
+          )}
+
+          {isRevealed && !transmitting && (
             <span
-              className="font-mono text-[9px] font-black tracking-[0.18em] uppercase"
-              style={{ color: config.glowColor, opacity: 0.3 }}
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 9,
+                letterSpacing: '0.12em',
+                color: config.glowColor,
+                opacity: 0.4,
+              }}
+            >
+              ● LIVE
+            </span>
+          )}
+        </div>
+
+        {/* ── Closed state body ── */}
+        {!isRevealed && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '18px 16px',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 9,
+                letterSpacing: '0.08em',
+                color: '#2a2a2a',
+              }}
+            >
+              {DOOR_LABELS[door.door_type]}
+            </span>
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 9,
+                fontWeight: 900,
+                letterSpacing: '0.18em',
+                color: config.glowColor,
+                opacity: 0.3,
+              }}
             >
               LOCKED
             </span>
           </div>
         )}
 
-        {/* ── REVEALED STATE ── */}
+        {/* ── Transmitting state ── */}
         <AnimatePresence>
-          {isRevealed && (
+          {isRevealed && transmitting && (
             <motion.div
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              className="px-5 pt-5 pb-5 overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ padding: '20px 16px', minHeight: 80 }}
             >
-              {/* Door number + type label row */}
-              <div className="flex items-center justify-between mb-3">
-                <div
-                  className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase"
-                  style={{ color: config.glowColor }}
-                >
-                  {config.label.toUpperCase()}
-                </div>
-                <span
-                  className="font-mono text-[9px] tracking-[0.12em] uppercase"
-                  style={{ color: config.glowColor, opacity: 0.4 }}
-                >
-                  DOOR {index + 1}
-                </span>
+              <div
+                style={{
+                  height: 2,
+                  background: `linear-gradient(90deg, ${config.glowColor}00, ${config.glowColor}, ${config.glowColor}00)`,
+                  borderRadius: 1,
+                  animation: 'scanline 0.9s ease-in-out infinite',
+                  marginBottom: 12,
+                }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {[80, 60, 40].map((w, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: 2,
+                      width: `${w}%`,
+                      background: '#1a1a1a',
+                      borderRadius: 1,
+                      animation: `shimmer 1.2s ease-in-out ${i * 0.15}s infinite`,
+                    }}
+                  />
+                ))}
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {/* ── Revealed content ── */}
+        <AnimatePresence>
+          {isRevealed && contentReady && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{ padding: '16px 16px 0' }}
+            >
               {/* Title */}
               <h3
-                className="font-serif text-[20px] font-bold leading-[1.1] tracking-tight text-white mb-3"
-                style={{ letterSpacing: '-0.02em' }}
+                style={{
+                  fontFamily: 'Georgia, serif',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                  color: '#ffffff',
+                  letterSpacing: '-0.02em',
+                  marginBottom: 10,
+                }}
               >
                 {door.title}
               </h3>
 
-              {/* Description */}
+              {/* Description — typewriter */}
               <p
-                className="text-[14px] leading-[1.65] mb-4"
-                style={{ color: '#888', fontFamily: 'Georgia, serif' }}
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  lineHeight: 1.7,
+                  color: '#777',
+                  marginBottom: 12,
+                  minHeight: '3.4em',
+                }}
               >
-                {door.description}
+                {descText}
+                {!descDone && (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 2,
+                      height: '1em',
+                      background: config.glowColor,
+                      marginLeft: 2,
+                      verticalAlign: 'middle',
+                      animation: 'cursorBlink 0.6s step-end infinite',
+                    }}
+                  />
+                )}
               </p>
 
-              {/* Why it works */}
+              {/* Why it works — appears after description types out */}
               <AnimatePresence>
-                {isRevealed && (
-                  <motion.div variants={whyVariants} initial="hidden" animate="visible">
+                {descDone && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                      borderLeft: `2px solid ${config.glowColor}55`,
+                      paddingLeft: 12,
+                      paddingTop: 2,
+                      paddingBottom: 2,
+                      marginBottom: 14,
+                    }}
+                  >
                     <div
-                      className="border-l-2 pl-4 py-0.5 mb-4"
-                      style={{ borderColor: config.glowColor }}
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: 8,
+                        letterSpacing: '0.16em',
+                        color: `${config.glowColor}88`,
+                        marginBottom: 5,
+                      }}
                     >
-                      <div
-                        className="font-mono text-[9px] tracking-[0.14em] uppercase mb-2"
-                        style={{ color: `${config.glowColor}aa` }}
-                      >
-                        WHY IT WORKS
-                      </div>
-                      <p
-                        className="font-mono text-[11px] leading-[1.65]"
-                        style={{ color: config.glowColor }}
-                      >
-                        {door.why_it_works}
-                      </p>
+                      WHY IT WORKS
                     </div>
+                    <p
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        lineHeight: 1.6,
+                        color: config.glowColor,
+                        minHeight: '2em',
+                      }}
+                    >
+                      {whyText}
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* ── PRIMARY TAP CTA — always visible on reveal, not hover-gated ── */}
+              {/* CTA button */}
               <AnimatePresence>
-                {!isAnyChosen && (
+                {!isAnyChosen && descDone && (
                   <motion.div
-                    variants={ctaVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, delay: 0.15 }}
+                    style={{ paddingBottom: 16 }}
                   >
                     <div
-                      className="w-full font-mono text-[11px] font-black tracking-[0.18em] uppercase py-3 rounded-[2px] text-center"
                       style={{
-                        background: isPressed
-                          ? config.glowColor
-                          : isHovered
-                          ? `${config.glowColor}22`
-                          : `${config.glowColor}12`,
+                        width: '100%',
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        fontWeight: 900,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase' as const,
+                        padding: '12px 0',
+                        borderRadius: 4,
+                        textAlign: 'center' as const,
+                        background: isPressed ? config.glowColor : `${config.glowColor}14`,
                         color: isPressed ? '#000' : config.glowColor,
-                        border: `1px solid ${config.glowColor}50`,
-                        transition: 'background 0.2s ease, color 0.2s ease',
-                        userSelect: 'none',
+                        border: `1px solid ${config.glowColor}44`,
+                        transition: 'background 0.15s ease, color 0.15s ease',
+                        userSelect: 'none' as const,
                       }}
                     >
                       ENTER THIS DOOR →
@@ -283,11 +451,21 @@ export default function Door({
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="mt-4"
+                    style={{ paddingBottom: 16 }}
                   >
                     <span
-                      className="inline-block font-mono text-[9px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-[2px]"
-                      style={{ background: config.glowColor, color: '#000' }}
+                      style={{
+                        display: 'inline-block',
+                        fontFamily: 'monospace',
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const,
+                        padding: '5px 10px',
+                        borderRadius: 3,
+                        background: config.glowColor,
+                        color: '#000',
+                      }}
                     >
                       YOUR CHOICE
                     </span>
@@ -297,7 +475,7 @@ export default function Door({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

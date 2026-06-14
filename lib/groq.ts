@@ -225,27 +225,41 @@ The user selected a door and raised an objection. Your job is not to validate th
 
 The refined path must feel more demanding than the original door. Not more accessible. Not gentler. If someone raises an objection and your output makes the path easier, you have failed.
 
+CRITICAL SPECIFICITY RULE — this is non-negotiable:
+Every sentence you write must be traceable back to details the user actually gave you.
+- The critique must name the specific pattern the objection reveals, using the user's own words as evidence.
+- The refined path must reference the specific door they chose, the specific situation they described, and the specific constraint they raised — not a generic version of those things.
+- The next interrogation vector must be so targeted that it would only make sense for this exact person in this exact situation.
+- If you find yourself writing something that could apply to any person in any situation — stop and rewrite it. Generic output is a failure mode.
+
+Before writing, identify:
+1. What exact words did the user use in their objection? Use at least one of them verbatim in the critique.
+2. What specific detail from their situation (city, role, constraint, relationship) can be woven into the refined path?
+3. What is the single sharpest question that only this person needs to answer?
+
 Rules:
 
 CRITIQUE — 1-2 sentences.
-Do not say "that's a valid concern." It isn't — it's a data point. Name the specific thing the objection reveals about the user's reasoning, fear structure, or hidden assumption. Be clinical. Be direct. The critique is not punishment — it is diagnosis.
+Do not say "that's a valid concern." It isn't — it's a data point. Name the specific thing the objection reveals about the user's reasoning, fear structure, or hidden assumption. Be clinical. Be direct. The critique is not punishment — it is diagnosis. Use their specific language back at them.
 
-Examples of weak critique:
+Examples of weak critique (DO NOT write these):
 - "Your concern about timing is understandable."
 - "This objection shows you're thinking carefully about risk."
+- "You are prioritizing short-term comfort over long-term gain." (too generic)
 
 Examples of strong critique:
+- "You said 'I don't have enough time' but you've already been thinking about this for [implied duration from situation] — time isn't the constraint, permission to start is."
+- "The word 'enough' in your objection is doing a lot of work. Enough time compared to what standard? You haven't named one."
 - "This objection reveals you've already decided not to do this — you're looking for a diagnosis that confirms exit, not a path through."
-- "You're treating a resource constraint as a fixed wall when it's actually a variable you haven't tried to move yet."
 
 REFINED PATH — 2-3 sentences.
-Take the constraint the objection revealed and use it as a mechanism, not an obstacle. The refined path should be more specific, more demanding, and more structurally sound than the original door because it now accounts for the real friction point.
+Take the constraint the objection revealed and use it as a mechanism, not an obstacle. The refined path should be more specific, more demanding, and more structurally sound than the original door because it now accounts for the real friction point. Must contain at least one concrete detail that proves you read their actual situation.
 
 NEXT INTERROGATION VECTOR — 1 sentence.
-The sharpest question that would crack open the next layer of avoidance. Not a soft question. Not "how does that make you feel?" A question that, if answered honestly, would force a decision.
+The sharpest question that would crack open the next layer of avoidance. Not a soft question. Not "how does that make you feel?" A question that, if answered honestly, would force a decision. It must be specific enough that it could only be asked of this person.
 
 OUTCOME TRACKING HINT — 1 sentence.
-One observable, time-bound signal that would confirm or refute the refined path within 14-30 days. Concrete. No abstractions.
+One observable, time-bound signal that would confirm or refute the refined path within 14-30 days. Concrete. No abstractions. Must reference something from their actual situation.
 
 Return ONLY valid JSON. No preamble. No explanation. No markdown.
 
@@ -279,14 +293,24 @@ export async function interrogateDoor(
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
-    temperature: 0.85,
+    temperature: 0.75,
     max_tokens: 1024,
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: INTERROGATION_PROMPT },
       {
         role: 'user',
-        content: `Previous situation: ${previous_situation.trim()}\n\nSelected door: ${selected_door}\n\nUser objection: ${user_objection.trim()}`,
+        content: `Here is the user's full situation (read it carefully — your output must reference specific details from this):
+
+SITUATION:
+${previous_situation.trim()}
+
+DOOR THEY CHOSE: ${selected_door}
+
+THEIR EXACT OBJECTION (use their words back at them):
+"${user_objection.trim()}"
+
+Now produce the interrogation output. Every sentence must be traceable to something specific in the above.`,
       },
     ],
   })

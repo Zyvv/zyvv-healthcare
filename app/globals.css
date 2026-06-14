@@ -1,4 +1,134 @@
 /* ============================================================
+   ZYVV — Terminal Panel Additions (TACTICAL v2)
+   Append these to the END of app/globals.css
+   ============================================================ */
+
+/* ── Scanline sweep — used during transmission state ── */
+@keyframes scanline {
+  0%   { opacity: 0.3; transform: scaleX(0.2); }
+  50%  { opacity: 1;   transform: scaleX(1); }
+  100% { opacity: 0.3; transform: scaleX(0.2); }
+}
+
+/* ── Shimmer skeleton — placeholder bars during transmission ── */
+@keyframes shimmer {
+  0%, 100% { opacity: 0.08; }
+  50%      { opacity: 0.22; }
+}
+
+/* ── Panel base — consistent across all phases ── */
+.zyvv-panel {
+  position: relative;
+  background: #080808;
+  border-radius: 6px;
+  border: 1px solid #1e1e1e;
+  overflow: hidden;
+}
+
+/* ── Panel header bar — top status row ── */
+.zyvv-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid #111;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ── Panel body ── */
+.zyvv-panel__body {
+  padding: 16px;
+}
+
+/* ── Refined phase panels — diagnosis / refined / next question ── */
+.zyvv-panel--diagnosis {
+  border-color: rgba(255, 45, 85, 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 45, 85, 0.12), inset 0 0 30px rgba(255, 45, 85, 0.03);
+}
+
+.zyvv-panel--refined {
+  border-color: rgba(191, 90, 242, 0.35);
+  box-shadow: 0 0 0 1px rgba(191, 90, 242, 0.15), inset 0 0 30px rgba(191, 90, 242, 0.04);
+}
+
+.zyvv-panel--next {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+/* ── Mirror panel ── */
+.zyvv-panel--mirror {
+  border-color: rgba(191, 90, 242, 0.3);
+  border-left: 2px solid #BF5AF2;
+  box-shadow: 0 0 0 1px rgba(191, 90, 242, 0.1), 0 0 30px rgba(191, 90, 242, 0.06);
+}
+
+/* ── Interrogation panel ── */
+.zyvv-panel--interrogation {
+  border-color: rgba(0, 245, 255, 0.2);
+}
+
+/* ── Section label — consistent across all phases ── */
+.zyvv-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── Panel field label — inside panels ── */
+.zyvv-field-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+
+/* ── Cursor blink — already in globals but ensure it exists ── */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* ── Typewriter text — mono body copy inside panels ── */
+.zyvv-typewriter {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: #888;
+}
+
+/* ── Loading dots — already in globals, ensure consistency ── */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1);   }
+}
+
+.dot-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.dot-pulse:nth-child(1) { animation-delay: 0s; }
+.dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+
+
+
+/* ============================================================
    ZYVV — Global Styles (WARP ENGINE v2)
    File: app/globals.css
    ============================================================ */
