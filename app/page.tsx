@@ -987,7 +987,7 @@ export default function HomePage() {
           alignItems: 'center',
           background: 'var(--color-panel-raised)',
         }}>
-          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: '#555' }}>
+          <span style={{ fontFamily: 'var(--font-hud)', fontSize: 7, letterSpacing: '0.1em', color: 'var(--color-text-dim)' }}>
             API ACCESS · EARLY PARTNER PROGRAM
           </span>
           <a
