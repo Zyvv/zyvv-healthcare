@@ -930,7 +930,7 @@ export default function HomePage() {
               transition: 'background 0.2s',
               outline: 'none',
               border: 'none',
-              
+              borderRight: '1px solid var(--color-border-dim)',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: 6 }}>
