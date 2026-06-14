@@ -1,9 +1,9 @@
 // ============================================================
-// ZYVV YUGA — Context Enrichment Engine
+// ZYVV MANA — Context Enrichment Engine
 // File: lib/contextEnrich.ts
 // Purpose: Two-pass pre-processing before generateDoors()
 //   Pass 1: Extract a precise search query from the situation (Groq fast)
-//   Pass 2: Fetch one verified external signal via Groq
+//   Pass 2: Fetch one verified external signal via Tavily
 // Returns: ContextSignal | null — null always fails silently
 // ============================================================
 
@@ -58,8 +58,28 @@ Situation: "I want to raise a seed round in Europe" → European seed funding tr
       return null
     }
 
-    // ── PASS 2: Fetch one verified external signal ───────────
-    const searchRes = await fetch(GROQ_URL, {
+    // ── PASS 2: Fetch verified external signal via Tavily ────
+    const tavilyRes = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query,
+        search_depth: 'basic',
+        max_results: 3,
+        include_answer: true,
+      }),
+    })
+
+    const tavilyData = await tavilyRes.json()
+    const raw = tavilyData.answer || tavilyData.results?.[0]?.content || null
+
+    if (!raw || raw.trim().length < 10) {
+      return null
+    }
+
+    // ── Compress into one clean signal line ──────────────────
+    const compressRes = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -67,29 +87,27 @@ Situation: "I want to raise a seed round in Europe" → European seed funding tr
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
-        max_tokens: 200,
+        max_tokens: 60,
         temperature: 0.1,
         messages: [
           {
             role: 'system',
-            content: `You are a research assistant. For the given query, return ONE concrete, verifiable fact as a single sentence.
-Include a number, percentage, or named entity where possible.
-Maximum 25 words. No hedging. No "according to". No source attribution. Just the fact.
+            content: `Compress this search result into ONE sentence. Maximum 20 words.
+Must include a specific number, percentage, or named data point if present.
+No hedging. No "according to". No source attribution. Just the fact.
 Output ONLY the sentence.`,
           },
-          { role: 'user', content: `Research this: ${query}` },
+          { role: 'user', content: `Query: ${query}\nResult: ${raw}` },
         ],
       }),
     })
 
-    const searchData = await searchRes.json()
-    const raw = searchData.choices?.[0]?.message?.content?.trim()
+    const compressData = await compressRes.json()
+    const signal = compressData.choices?.[0]?.message?.content?.trim()
 
-    if (!raw || raw.trim().length < 10) {
+    if (!signal || signal.trim().length < 10) {
       return null
     }
-
-    const signal = raw.length > 120 ? raw.slice(0, 117) + '...' : raw
 
     return {
       signal: signal.trim(),
