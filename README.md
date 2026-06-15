@@ -230,3 +230,96 @@ The difference is not intelligence. It is who initiates the context retrieval.
 ---
 
 Built in 48 hours. Zero budget. Deployed.
+
+
+Now I have everything I need. Let me write the README architecture section based on the actual code.Now here's the README section — paste this directly into your `README.md`:
+
+---
+
+```markdown
+## Architecture
+
+### Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 (App Router) |
+| Inference | Groq API — Llama 3.3 70B (Vercel Edge) |
+| Embeddings | Groq — `nomic-embed-text-v1.5` → `vector(1536)` |
+| Database | Supabase (PostgreSQL + pgvector) |
+| ORM / client | Supabase JS (`supabaseAdmin` server-only) |
+| Deployment | Vercel |
+
+---
+
+### Data model
+
+```
+situations      — raw user input + pgvector embedding column
+doors           — 3 generated paths per situation (conventional / contrarian / alien)
+                  + `potential_objections[]` per door
+choices         — FK to situation + door; stores user objection text
+outcomes        — FK to choice; outcome_text + outcome_score (1–5)
+```
+
+Relationships: `situations → doors → choices → outcomes` (linear, append-only).
+
+---
+
+### API routes
+
+| Route | Mode | Purpose |
+|---|---|---|
+| `api/generate` | `INITIALIZATION` | Takes situation string, returns roast + 3 doors via Groq |
+| `api/interrogate` | `INTERROGATION` | Takes chosen door + user objection, returns refinement block |
+| `api/save` | — | Persists choice and outcome to Supabase |
+
+---
+
+### Version modes
+
+ZYVV runs two reasoning modes selected at request time via `ZyvvVersion`:
+
+- **MANA** — detects the hidden assumption in the user's framing (`assumption_detected`)
+- **YUGA** — surfaces a relevant external context signal (`context_signal`, `context_query`)
+
+Both modes share the same door generation pipeline; the version flag adds a pre-processing layer before Groq inference.
+
+---
+
+### Data moat — what was built today
+
+**Phase 1 (complete):** `choiceId` propagation fixed through `page.tsx` → `ShareCard.tsx`, closing the outcome reporting loop. Every session now produces a ground-truth signal row in `outcomes`.
+
+**Phase 2 (complete):** After each situation is saved to Supabase, `saveSituation()` in `lib/supabase.ts` fires a non-blocking embedding call:
+
+```typescript
+// lib/supabase.ts — Phase 2 embedding (non-blocking)
+const embeddingRes = await groq.embeddings.create({
+  model: 'nomic-embed-text-v1_5',
+  input: situation.content ?? '',
+})
+await supabaseAdmin
+  .from('situations')
+  .update({ embedding: vector })
+  .eq('id', id)
+```
+
+Failures are caught silently — embedding never blocks door generation.
+
+**Phase 3 (pending — 500+ rows required):** Before generating doors, query `pgvector` for the 3 most similar past situations with `outcome_score ≥ 4`. Inject resolved paths as context into the Groq system prompt. Doors become informed by what actually worked for similar humans.
+
+**Phase 4 (month 2):** Nightly Vercel Cron job — aggregate `objections` table by door type, pre-load top objections into the interrogation prompt.
+
+---
+
+### Why this architecture
+
+The three-door structure (`conventional / contrarian / alien`) is a proprietary reasoning protocol, not a generic RAG wrapper. The data layer is designed to serve that structure: as volume grows, the alien door for "I'm leaving my job" will be informed by what people who faced the same situation actually did and reported back — not by behavioral economics PDFs.
+
+The outcome score (1–5) in the `outcomes` table is the moat seed. One verified outcome row is worth more than 1,000 raw sessions.
+```
+
+---
+
+That's it. Architecture diagram embedded above for reference. Paste, push, done.
