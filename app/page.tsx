@@ -427,6 +427,7 @@ export default function HomePage() {
   const [showPostMirror, setShowPostMirror] = useState(false)
   const [version, setVersion] = useState<'mana' | 'yuga'>('mana')
   const [contextSignal, setContextSignal] = useState<{ signal: string; query: string } | null>(null)
+  const [choiceId, setChoiceId] = useState<number | null>(null)
 
   const sessionIdRef = useRef<string>(generateSessionId())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -545,11 +546,15 @@ export default function HomePage() {
     setPhase('chosen')
     if (situationId && door.id) {
       try {
-        await fetch('/api/save', {
+        const res = await fetch('/api/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ situation_id: situationId, door_id: door.id }),
         })
+        const data = await res.json().catch(() => ({}))
+        if (res.ok && data?.choice_id) {
+          setChoiceId(data.choice_id)
+        }
       } catch { /* silent */ }
     }
     setTimeout(() => setPhase('interrogation'), 900)
@@ -604,6 +609,7 @@ export default function HomePage() {
     setBreach(null)
     setShowPostMirror(false)
     setContextSignal(null)
+    setChoiceId(null)
     revealTimersRef.current.forEach(clearTimeout)
     setPhase('input')
     sessionIdRef.current = generateSessionId()
@@ -1573,6 +1579,7 @@ export default function HomePage() {
                   roast={mirror}
                   doors={doors}
                   chosenDoor={chosenDoor}
+                  choiceId={choiceId ?? undefined}
                   onDone={handleReset}
                 />
               </motion.section>
