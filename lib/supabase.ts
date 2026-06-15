@@ -40,7 +40,29 @@ export async function saveSituation(
     .single()
 
   if (error) throw new Error(`saveSituation: ${error.message}`)
-  return data.id
+  const id = data.id
+
+  // Phase 2 — embed situation text for pgvector moat
+  try {
+    const Groq = (await import('groq-sdk')).default
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+    const embeddingRes = await groq.embeddings.create({
+      model: 'nomic-embed-text-v1_5',
+      input: situation.content ?? '',
+    })
+    const vector = embeddingRes.data[0]?.embedding
+    if (vector) {
+      await supabaseAdmin
+        .from('situations')
+        .update({ embedding: vector })
+        .eq('id', id)
+    }
+  } catch (e) {
+    // non-blocking — embedding failure never breaks door generation
+    console.warn('Embedding failed silently:', e)
+  }
+
+  return id
 }
 
 /**
