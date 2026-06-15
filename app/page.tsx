@@ -409,6 +409,12 @@ function MinLengthBar({ current, min }: { current: number; min: number }) {
 
 // ── Main component ───────────────────────────────────────────
 
+const LOADING_LINES = [
+  "Your situation is being read, not solved.",
+  "Three perspectives that disagree with each other are being built.",
+  "The obvious answer is being set aside.",
+]
+
 export default function HomePage() {
   const [phase, setPhase] = useState<AppPhase>('input')
   const [situation, setSituation] = useState('')
@@ -1083,6 +1089,9 @@ export default function HomePage() {
       <div className="transmission-sweep" style={{ marginBottom: 14 }} />
       <div style={{ fontFamily: 'var(--font-hud)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--color-text-secondary)', marginBottom: 16 }}>
         ADVERSARIAL LOGIC PROTOCOL · DIVERGENCE ENGINE ACTIVE
+      </div>
+      <div style={{ fontFamily: 'var(--font-hud)', fontSize: 11, letterSpacing: '0.05em', color: 'var(--color-text-primary)', marginBottom: 16, textAlign: 'center' }}>
+        {LOADING_LINES[Math.floor(Date.now() / 10000) % LOADING_LINES.length]}
       </div>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
         <span className="dot-pulse" />
