@@ -44,13 +44,19 @@ export async function saveSituation(
 
   // Phase 2 — embed situation text for pgvector moat
   try {
-    const Groq = (await import('groq-sdk')).default
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
-    const embeddingRes = await groq.embeddings.create({
-      model: 'nomic-embed-text-v1_5',
-      input: situation.content ?? '',
+    const res = await fetch('https://api.groq.com/openai/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY!}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'nomic-embed-text-v1.5',
+        input: situation.content ?? '',
+      }),
     })
-    const vector = embeddingRes.data[0]?.embedding
+    const embeddingRes = await res.json()
+    const vector = embeddingRes.data?.[0]?.embedding
     if (vector) {
       await supabaseAdmin
         .from('situations')
