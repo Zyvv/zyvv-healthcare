@@ -47,10 +47,8 @@ export default function PatientCapsule() {
     const file = e.target.files?.[0]
     if (!file) return
     setEhrFile(file)
-    // Edge processing — file never leaves the device
     const reader = new FileReader()
     reader.onload = () => {
-      // Local parse only. No network call.
       setEhrProcessed(true)
     }
     reader.readAsText(file)
@@ -63,7 +61,6 @@ export default function PatientCapsule() {
     setLoadingLine(0)
     setError('')
 
-    // ChronosGate: 10-second mandatory delay
     let tick = 10
     const lineInterval = setInterval(() => {
       setLoadingLine((prev) => (prev + 1) % LOADING_LINES.length)
@@ -102,7 +99,6 @@ export default function PatientCapsule() {
   }
 
   const handleClose = () => {
-    // Teku: evaporate on close
     setDiagnostic(null)
     setIdentifier('')
     setEhrFile(null)
@@ -123,9 +119,9 @@ export default function PatientCapsule() {
       justifyContent: 'center',
       padding: '48px 24px',
     }}>
-
-      {/* Header */}
       <div style={{ width: '100%', maxWidth: '640px' }}>
+
+        {/* Header */}
         <p style={{ color: '#555555', fontSize: '11px', letterSpacing: '3px', marginBottom: '32px' }}>
           SOVEREIGN HEALTH CAPSULE · PROTOCOL ACTIVE
         </p>
@@ -145,9 +141,8 @@ export default function PatientCapsule() {
           marginBottom: '40px',
         }}>
           <p style={{ color: '#aaaaaa', fontSize: '13px', lineHeight: '1.8', letterSpacing: '0.5px' }}>
-            Epic knows your average. It doesn't know you.<br />
-            Your biological signal: Never pooled. Never averaged.<br />
-            Processed locally. Evaporated on close.
+            The system finds the 95% confidence interval and calls everything outside it noise.<br />
+            Your biology is outside it. That is not noise. That is the diagnosis.
           </p>
         </div>
 
@@ -158,10 +153,10 @@ export default function PatientCapsule() {
           marginBottom: '40px',
         }}>
           <p style={{ color: '#666666', fontSize: '11px', lineHeight: '1.9', letterSpacing: '0.5px' }}>
-            EHR systems pool your patient's data into databases of 220M+ records.<br />
-            Rare conditions are filtered as statistical noise.<br />
-            Doctors treat the average. Not the person.<br />
-            <span style={{ color: '#888888' }}>ZYVV runs a parallel sanctuary. One signal. One capsule. No cloud.</span>
+            Clinical AI aggregates millions of patients to find the statistical average.<br />
+            Your rare condition, your nuanced symptom, your non-linear biology — filtered out.<br />
+            Doctors are pushed to treat the curve. Not the person on the table.<br />
+            <span style={{ color: '#888888' }}>ZYVV keeps the diagnostic tool local. Your signal is the only coordinate that runs here.</span>
           </p>
         </div>
 
@@ -287,7 +282,6 @@ export default function PatientCapsule() {
             )}
           </>
         ) : state === 'LOADING' ? (
-          /* ChronosGate countdown */
           <div style={{ border: '1px solid #222222', padding: '32px 24px' }}>
             <p style={{ color: '#555555', fontSize: '10px', letterSpacing: '3px', marginBottom: '24px' }}>
               CHRONOSGATE ACTIVE
@@ -303,7 +297,6 @@ export default function PatientCapsule() {
             </p>
           </div>
         ) : state === 'OPEN' && diagnostic ? (
-          /* Diagnostic view */
           <div style={{ border: '1px solid #222222', padding: '32px 24px' }}>
             <p style={{ color: '#555555', fontSize: '10px', letterSpacing: '3px', marginBottom: '24px' }}>
               CAPSULE OPEN · {diagnostic.mode} MODE
@@ -355,8 +348,9 @@ export default function PatientCapsule() {
 
         {/* Footer */}
         <p style={{ color: '#222222', fontSize: '10px', letterSpacing: '2px', marginTop: '48px' }}>
-          ZYVV HEALTH · PARALLEL SOVEREIGN SANCTUARY · NO CLOUD · NO AVERAGE
+          ZYVV HEALTH · YOUR SIGNAL IS NOT OUTSIDE THE CURVE · IT IS THE ONLY CURVE THAT MATTERS
         </p>
+
       </div>
     </div>
   )
